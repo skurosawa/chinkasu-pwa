@@ -1,0 +1,86 @@
+body {
+  margin: 0;
+  font-family: "Noto Sans JP", system-ui, -apple-system, sans-serif;
+  background: linear-gradient(180deg, #fff1fa 0%, #f8e8ff 100%);
+  color: #2b2b2b;
+  text-align: center;
+}
+
+.app {
+  padding: 24px;
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+h1 {
+  font-size: 22px;
+  margin: 8px 0 16px;
+}
+
+.card {
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 22px;
+  margin: 16px 0;
+  box-shadow: 0 10px 34px rgba(255, 105, 180, 0.18);
+  border: 1px solid rgba(199, 166, 255, 0.25);
+}
+
+.card p {
+  margin: 0;
+  opacity: 0.75;
+}
+
+.count {
+  font-size: 56px;
+  font-weight: 800;
+  margin: 6px 0 0;
+}
+
+.badge {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(168, 240, 230, 0.6);
+  border: 1px solid rgba(168, 240, 230, 0.9);
+  font-size: 12px;
+}
+
+.puni-btn {
+  width: 100%;
+  background: linear-gradient(90deg, #ff69b4, #c7a6ff);
+  color: white;
+  border: none;
+  border-radius: 999px;
+  padding: 18px 18px;
+  font-size: 18px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 14px 32px rgba(199, 166, 255, 0.25);
+  transition: transform 0.08s ease;
+}
+
+.puni-btn:active {
+  transform: scale(0.96);
+}
+
+.taunt {
+  margin-top: 14px;
+  font-weight: 800;
+  background: rgba(255, 255, 255, 0.65);
+  border: 1px solid rgba(255, 105, 180, 0.18);
+  border-radius: 18px;
+  padding: 14px 16px;
+  backdrop-filter: blur(6px);
+}
+
+.stats {
+  margin-top: 18px;
+  font-size: 13px;
+  opacity: 0.72;
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
