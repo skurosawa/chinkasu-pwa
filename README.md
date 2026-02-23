@@ -1,73 +1,72 @@
-# React + TypeScript + Vite
+# 🫧 ちんかすカウンター (v0.3.0)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+ゆめかわ清潔で毎日きろくするジョークPWA。
 
-Currently, two official plugins are available:
+👉 https://skurosawa.github.io/chinkasu-pwa/
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## React Compiler
+## ✨ コンセプト
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+毎日の「きろく」を通して自分をゆるく煽る、
+ゆめかわ清潔チャレンジアプリ。
 
-## Expanding the ESLint configuration
+- オフライン対応
+- ホーム画面に追加可能（PWA）
+- 清潔連続日数を自動計算
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+---
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## 🚀 主な機能
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+- ✅ 今日のカウント（+1ボタン）
+- ✅ 累計カウント表示
+- ✅ 清潔連続日数
+- ✅ 最長清潔記録
+- ✅ オフライン起動対応
+- ✅ iPhone動作確認済み
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+---
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 📱 使い方
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+1. Safariでアクセス  
+2. 「共有」→「ホーム画面に追加」
+3. アプリのように起動可能
+4. オフラインでも動作します
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+---
+
+## 🛠 技術スタック
+
+- React
+- Vite
+- TypeScript
+- vite-plugin-pwa
+- GitHub Pages
+
+---
+
+## 🔢 バージョン履歴
+
+### v0.3.0
+- GitHub Pages公開
+- PWAオフライン対応
+- 清潔連続ロジック実装
+- iPhone動作確認完了
+
+---
+
+## 📌 今後の予定
+
+- 神清潔エフェクト
+- 履歴グラフ表示
+- Xシェア機能
+- デザイン強化
+
+---
+
+## ⚠ 注意
+
+ジョークアプリです。
+実際の衛生管理は自己責任でお願いします。
