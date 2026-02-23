@@ -1,7 +1,11 @@
+import { updateCleanStreak } from './lib/streak'
 import { useEffect, useMemo, useState } from 'react'
 
 const getTodayKeyJST = () =>
   new Date().toLocaleDateString('ja-JP', { timeZone: 'Asia/Tokyo' })
+
+const [cleanStreak, setCleanStreak] = useState(0)
+const [bestClean, setBestClean] = useState(0)
 
 export default function App() {
   const todayKey = useMemo(() => getTodayKeyJST(), [])
@@ -13,6 +17,9 @@ export default function App() {
     const savedTotal = localStorage.getItem('totalCount')
     if (savedToday) setCount(Number(savedToday))
     if (savedTotal) setTotal(Number(savedTotal))
+    const st = updateCleanStreak(todayKey)
+    setCleanStreak(st.current)
+    setBestClean(st.best)
   }, [todayKey])
 
   const badge = () => {
@@ -59,8 +66,11 @@ export default function App() {
       <div className="stats">
         <span>累計: {total}</span>
         <span>・</span>
-        <span>日付キー: {todayKey}</span>
+        <span>清潔連続: {cleanStreak}日</span>
+        <span>・</span>
+        <span>最長清潔: {bestClean}日</span>
       </div>
     </div>
+    
   )
 }

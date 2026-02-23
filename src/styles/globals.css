@@ -84,3 +84,9 @@ h1 {
   justify-content: center;
   flex-wrap: wrap;
 }
+
+.stats span {
+  background: rgba(255,255,255,0.6);
+  padding: 4px 10px;
+  border-radius: 999px;
+}
