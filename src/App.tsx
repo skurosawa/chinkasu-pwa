@@ -1,22 +1,24 @@
-import { updateCleanStreak } from './lib/streak'
 import { useEffect, useMemo, useState } from 'react'
+import { updateCleanStreak } from './lib/streak'
 
 const getTodayKeyJST = () =>
   new Date().toLocaleDateString('ja-JP', { timeZone: 'Asia/Tokyo' })
 
-const [cleanStreak, setCleanStreak] = useState(0)
-const [bestClean, setBestClean] = useState(0)
-
 export default function App() {
   const todayKey = useMemo(() => getTodayKeyJST(), [])
+
   const [count, setCount] = useState(0)
   const [total, setTotal] = useState(0)
+  const [cleanStreak, setCleanStreak] = useState(0)
+  const [bestClean, setBestClean] = useState(0)
 
+  // 初回ロード時に localStorage から復元 + streak 計算
   useEffect(() => {
     const savedToday = localStorage.getItem(`day:${todayKey}`)
     const savedTotal = localStorage.getItem('totalCount')
     if (savedToday) setCount(Number(savedToday))
     if (savedTotal) setTotal(Number(savedTotal))
+
     const st = updateCleanStreak(todayKey)
     setCleanStreak(st.current)
     setBestClean(st.best)
@@ -41,10 +43,17 @@ export default function App() {
   const onAdd = () => {
     const next = count + 1
     const nextTotal = total + 1
+
     setCount(next)
     setTotal(nextTotal)
+
     localStorage.setItem(`day:${todayKey}`, String(next))
     localStorage.setItem('totalCount', String(nextTotal))
+
+    // streak を再計算（このアプリの仕様上は起動時でもOKだが、表示追従させる）
+    const st = updateCleanStreak(todayKey)
+    setCleanStreak(st.current)
+    setBestClean(st.best)
   }
 
   return (
@@ -71,6 +80,5 @@ export default function App() {
         <span>最長清潔: {bestClean}日</span>
       </div>
     </div>
-    
   )
 }
