@@ -42,11 +42,12 @@ export default defineConfig({
         ],
       },
       workbox: {
-        navigateFallback: `/${repoName}/index.html`,
+        navigateFallback: '/chinkasu-pwa/index.html',
         globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,woff2}'],
         clientsClaim: true,
         skipWaiting: true,
-      },
+        cleanupOutdatedCaches: true, // ← これ追加（超重要）
+    },
     }),
   ],
 })
