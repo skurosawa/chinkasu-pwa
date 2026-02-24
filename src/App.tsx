@@ -17,37 +17,42 @@ const getOrInitLastResetAt = () => {
 
 export default function App() {
   const todayKey = useMemo(() => getTodayKeyJST(), [])
-  const [point, setPoint] = useState(0)
-  const [lastResetAt, setLastResetAt] = useState<number>(() => getOrInitLastResetAt())
 
-  // 清潔連続（その日に🛁押したら+1、同日複数回はノーカン）
+  const [point, setPoint] = useState(0)
+  const [lastResetAt, setLastResetAt] = useState<number>(() =>
+    getOrInitLastResetAt(),
+  )
+
   const [cleanStreak, setCleanStreak] = useState<number>(() =>
     Number(localStorage.getItem('currentCleanStreak') ?? '0'),
   )
+
   const [bestClean, setBestClean] = useState<number>(() =>
     Number(localStorage.getItem('bestCleanStreak') ?? '0'),
   )
 
-  // 直近の🛁履歴表示（例: 13→0）
   const [lastBathPoint, setLastBathPoint] = useState<number | null>(null)
 
-  // 起動時に直近イベントを読む
+  // 起動時に履歴の最新を読む
   useEffect(() => {
     const events = loadBathEvents()
     const last = events.at(-1)
     setLastBathPoint(last ? last.pointBefore : null)
   }, [])
 
-  // 起動時＆一定間隔でポイント再計算（1分に1回で十分）
+  // 1分ごとにポイント再計算
   useEffect(() => {
     const tick = () => {
       const p = calcPoint(nowMs(), lastResetAt, MAX_POINT)
       setPoint(p)
     }
     tick()
-    const id = window.setInterval(tick, 60 * 1000) // 1 minute
+    const id = window.setInterval(tick, 60 * 1000)
     return () => window.clearInterval(id)
   }, [lastResetAt])
+
+  const dangerPercent = Math.round((point / MAX_POINT) * 100)
+  const isDanger = point >= 24
 
   const badge = () => {
     if (point === 0) return 'きらきら清潔✨'
@@ -69,16 +74,13 @@ export default function App() {
     const before = point
     const t = nowMs()
 
-    // 🛁イベント履歴に保存
     appendBathEvent({ ts: t, dayKey: todayKey, pointBefore: before })
     setLastBathPoint(before)
 
-    // リセット
     localStorage.setItem('lastResetAt', String(t))
     setLastResetAt(t)
     setPoint(0)
 
-    // その日に初めて🛁を押したなら、清潔連続を+1
     const lastBathDay = localStorage.getItem('lastBathDay') ?? ''
     if (lastBathDay !== todayKey) {
       const next = cleanStreak + 1
@@ -99,7 +101,21 @@ export default function App() {
 
       <div className="card">
         <p>現在ポイント（1時間で+1）</p>
+
         <div className="count">{point}</div>
+
+        {/* 危険度ゲージ */}
+        <div className="gauge">
+          <div
+            className="gaugeFill"
+            style={{ width: `${dangerPercent}%` }}
+          />
+        </div>
+
+        <div className={`gaugeLabel ${isDanger ? 'danger' : ''}`}>
+          危険度: {dangerPercent}%
+        </div>
+
         <div className="badge">{badge()}</div>
       </div>
 
@@ -116,7 +132,9 @@ export default function App() {
         <span>・</span>
         <span>上限: {MAX_POINT}</span>
         <span>・</span>
-        <span>直近🛁: {lastBathPoint === null ? '-' : `${lastBathPoint}→0`}</span>
+        <span>
+          直近🛁: {lastBathPoint === null ? '-' : `${lastBathPoint}→0`}
+        </span>
       </div>
     </div>
   )
