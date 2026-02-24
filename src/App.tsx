@@ -1,59 +1,96 @@
 import { useEffect, useMemo, useState } from 'react'
-import { updateCleanStreak } from './lib/streak'
+import { calcPoint, MAX_POINT } from './lib/points'
+import { loadBathEvents, appendBathEvent } from './lib/bathHistory'
 
 const getTodayKeyJST = () =>
   new Date().toLocaleDateString('ja-JP', { timeZone: 'Asia/Tokyo' })
 
+const nowMs = () => Date.now()
+
+const getOrInitLastResetAt = () => {
+  const v = localStorage.getItem('lastResetAt')
+  if (v) return Number(v)
+  const t = nowMs()
+  localStorage.setItem('lastResetAt', String(t))
+  return t
+}
+
 export default function App() {
   const todayKey = useMemo(() => getTodayKeyJST(), [])
+  const [point, setPoint] = useState(0)
+  const [lastResetAt, setLastResetAt] = useState<number>(() => getOrInitLastResetAt())
 
-  const [count, setCount] = useState(0)
-  const [total, setTotal] = useState(0)
-  const [cleanStreak, setCleanStreak] = useState(0)
-  const [bestClean, setBestClean] = useState(0)
+  // 清潔連続（その日に🛁押したら+1、同日複数回はノーカン）
+  const [cleanStreak, setCleanStreak] = useState<number>(() =>
+    Number(localStorage.getItem('currentCleanStreak') ?? '0'),
+  )
+  const [bestClean, setBestClean] = useState<number>(() =>
+    Number(localStorage.getItem('bestCleanStreak') ?? '0'),
+  )
 
-  // 初回ロード時に localStorage から復元 + streak 計算
+  // 直近の🛁履歴表示（例: 13→0）
+  const [lastBathPoint, setLastBathPoint] = useState<number | null>(null)
+
+  // 起動時に直近イベントを読む
   useEffect(() => {
-    const savedToday = localStorage.getItem(`day:${todayKey}`)
-    const savedTotal = localStorage.getItem('totalCount')
-    if (savedToday) setCount(Number(savedToday))
-    if (savedTotal) setTotal(Number(savedTotal))
+    const events = loadBathEvents()
+    const last = events.at(-1)
+    setLastBathPoint(last ? last.pointBefore : null)
+  }, [])
 
-    const st = updateCleanStreak(todayKey)
-    setCleanStreak(st.current)
-    setBestClean(st.best)
-  }, [todayKey])
+  // 起動時＆一定間隔でポイント再計算（1分に1回で十分）
+  useEffect(() => {
+    const tick = () => {
+      const p = calcPoint(nowMs(), lastResetAt, MAX_POINT)
+      setPoint(p)
+    }
+    tick()
+    const id = window.setInterval(tick, 60 * 1000) // 1 minute
+    return () => window.clearInterval(id)
+  }, [lastResetAt])
 
   const badge = () => {
-    if (count === 0) return 'きらきら清潔✨'
-    if (count < 5) return 'ふわふわ平和🫧'
-    if (count < 10) return 'そろそろおふろ🛁'
-    if (count < 20) return 'リセット推奨🙂'
+    if (point === 0) return 'きらきら清潔✨'
+    if (point < 4) return 'ふわふわ平和🫧'
+    if (point < 12) return 'そろそろおふろ🛁'
+    if (point < 24) return 'リセット推奨🙂'
     return '⚠️ 危険かも…！'
   }
 
   const taunt = () => {
-    if (count === 0) return '神清潔！そのまま光になろう✨'
-    if (count < 5) return 'いい感じ〜！今日もえらい🫧'
-    if (count < 10) return 'おふろ入ったら運気も上がるかも🛁'
-    if (count < 20) return '今日は“清潔デー”にしよ？🙂'
+    if (point === 0) return '神清潔！そのまま光になろう✨'
+    if (point < 4) return 'いい感じ〜！今日もえらい🫧'
+    if (point < 12) return 'おふろ入ったら運気も上がるかも🛁'
+    if (point < 24) return '今日は“清潔デー”にしよ？🙂'
     return '⚠️ ちょっと危険かも…まずはおふろ！'
   }
 
-  const onAdd = () => {
-    const next = count + 1
-    const nextTotal = total + 1
+  const onBathReset = () => {
+    const before = point
+    const t = nowMs()
 
-    setCount(next)
-    setTotal(nextTotal)
+    // 🛁イベント履歴に保存
+    appendBathEvent({ ts: t, dayKey: todayKey, pointBefore: before })
+    setLastBathPoint(before)
 
-    localStorage.setItem(`day:${todayKey}`, String(next))
-    localStorage.setItem('totalCount', String(nextTotal))
+    // リセット
+    localStorage.setItem('lastResetAt', String(t))
+    setLastResetAt(t)
+    setPoint(0)
 
-    // streak を再計算（このアプリの仕様上は起動時でもOKだが、表示追従させる）
-    const st = updateCleanStreak(todayKey)
-    setCleanStreak(st.current)
-    setBestClean(st.best)
+    // その日に初めて🛁を押したなら、清潔連続を+1
+    const lastBathDay = localStorage.getItem('lastBathDay') ?? ''
+    if (lastBathDay !== todayKey) {
+      const next = cleanStreak + 1
+      const nextBest = Math.max(bestClean, next)
+
+      setCleanStreak(next)
+      setBestClean(nextBest)
+
+      localStorage.setItem('currentCleanStreak', String(next))
+      localStorage.setItem('bestCleanStreak', String(nextBest))
+      localStorage.setItem('lastBathDay', todayKey)
+    }
   }
 
   return (
@@ -61,23 +98,25 @@ export default function App() {
       <h1>ちんかすカウンター🫧</h1>
 
       <div className="card">
-        <p>今日のきろく</p>
-        <div className="count">{count}</div>
+        <p>現在ポイント（1時間で+1）</p>
+        <div className="count">{point}</div>
         <div className="badge">{badge()}</div>
       </div>
 
-      <button className="puni-btn" onClick={onAdd}>
-        +1 きろくする
+      <button className="puni-btn" onClick={onBathReset}>
+        🛁 おふろでリセット
       </button>
 
       <div className="taunt">{taunt()}</div>
 
       <div className="stats">
-        <span>累計: {total}</span>
-        <span>・</span>
         <span>清潔連続: {cleanStreak}日</span>
         <span>・</span>
         <span>最長清潔: {bestClean}日</span>
+        <span>・</span>
+        <span>上限: {MAX_POINT}</span>
+        <span>・</span>
+        <span>直近🛁: {lastBathPoint === null ? '-' : `${lastBathPoint}→0`}</span>
       </div>
     </div>
   )
