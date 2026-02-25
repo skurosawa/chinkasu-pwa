@@ -1,46 +1,163 @@
-#root {
-  max-width: 1280px;
+:root{
+  --bg0:#fff7fb;
+  --bg1:#fff1fa;
+
+  --card: rgba(255,255,255,.78);
+  --line: rgba(255, 105, 180, .18);
+
+  --text:#2b2230;
+  --sub:#6b5b6e;
+
+  --pink:#ff5fa2;
+  --pink2:#ffa6d4;
+  --pink3:#ffd1e8;
+
+  --shadow: 0 10px 30px rgba(255, 105, 180, .14);
+  --shadow2: 0 6px 16px rgba(17, 24, 39, .08);
+
+  --r-xl: 26px;
+  --r-lg: 18px;
+
+  --tap: 52px;
+}
+
+*{ box-sizing:border-box; }
+
+.app{
+  max-width: 520px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 18px 14px 28px;
   text-align: center;
+  color: var(--text);
 }
 
-/* ---- Viteテンプレのロゴ系（使ってないなら削除してOK） ---- */
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+/* タイトル */
+.app h1{
+  margin: 12px 0 8px;
+  font-size: 28px;
+  font-weight: 900;
+  letter-spacing: .02em;
 }
 
-@keyframes logo-spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+/* カード */
+.card{
+  margin-top: 14px;
+  padding: 18px 16px;
+  border-radius: var(--r-xl);
+  background: var(--card);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+.card p{
+  margin: 0 0 8px;
+  color: var(--sub);
+  font-weight: 800;
 }
 
-/* ⚠️ .card は App 側でも使ってるので、ここは“最小”にして事故を防ぐ */
-.card {
-  padding: 2em;
+/* 数値 */
+.count{
+  font-size: 64px;
+  font-weight: 900;
+  line-height: 1;
+  margin: 10px 0 14px;
+  letter-spacing: .02em;
 }
 
-.read-the-docs {
-  color: #888;
+/* ゲージ */
+.gauge{
+  height: 16px;
+  border-radius: 999px;
+  background: rgba(255, 105, 180, .10);
+  border: 1px solid rgba(255, 105, 180, .12);
+  overflow: hidden;
+}
+
+.gaugeFill{
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--pink), var(--pink2), var(--pink3));
+  transition: width .25s ease;
+}
+
+.gaugeLabel{
+  margin-top: 10px;
+  font-weight: 900;
+  color: var(--sub);
+}
+
+.gaugeLabel.danger{
+  color: #d7266a;
+}
+
+/* バッジ（状態文言） */
+.badge{
+  margin-top: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 105, 180, .18);
+  background: rgba(255, 255, 255, .82);
+  box-shadow: var(--shadow2);
+  font-weight: 900;
+}
+
+/* ぷにボタン */
+.puni-btn{
+  width: 100%;
+  margin-top: 14px;
+  min-height: var(--tap);
+  border: 0;
+  border-radius: 999px;
+  font-weight: 900;
+  font-size: 16px;
+  letter-spacing: .02em;
+  color: #fff;
+  background: linear-gradient(90deg, var(--pink), #ff79b8);
+  box-shadow: 0 12px 26px rgba(255, 95, 162, .25);
+  transform: translateY(0);
+  transition: transform .12s ease, filter .12s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.puni-btn:active{
+  transform: translateY(1px) scale(.99);
+  filter: brightness(.98);
+}
+
+/* 煽り文言 */
+.taunt{
+  margin: 14px 0 0;
+  padding: 12px 14px;
+  border-radius: var(--r-lg);
+  background: rgba(255, 255, 255, .64);
+  border: 1px solid rgba(255, 105, 180, .14);
+  color: var(--text);
+  font-weight: 900;
+}
+
+/* 下の統計 */
+.stats{
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: var(--r-lg);
+  background: rgba(255, 255, 255, .58);
+  border: 1px dashed rgba(255, 105, 180, .26);
+  color: var(--sub);
+  font-weight: 900;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
 }
 
 /* ---- 神清潔トースト ---- */
-.godToast {
+.godToast{
   position: fixed;
   inset: 0;
   display: flex;
@@ -50,94 +167,77 @@
   z-index: 9999;
 }
 
-.godToastInner {
+.godToastInner{
   padding: 14px 18px;
-  border-radius: 16px;
+  border-radius: 18px;
   font-weight: 900;
-  background: rgba(0, 0, 0, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, .72);
+  border: 1px solid rgba(255, 105, 180, .22);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   animation: godPop 1.6s ease both;
-  color: #fff;
+  color: #3a2536;
+  box-shadow: var(--shadow);
 }
 
-@keyframes godPop {
-  0%   { transform: translateY(12px) scale(0.96); opacity: 0; }
+@keyframes godPop{
+  0%   { transform: translateY(10px) scale(.96); opacity: 0; }
   18%  { transform: translateY(0) scale(1.02);   opacity: 1; }
   70%  { transform: translateY(0) scale(1);      opacity: 1; }
-  100% { transform: translateY(-8px) scale(0.98); opacity: 0; }
+  100% { transform: translateY(-8px) scale(.98); opacity: 0; }
 }
 
 /* ---- 神清潔バッジ（ヘッダー下） ---- */
-.godBadge {
+.godBadge{
   display: inline-flex;
   align-items: baseline;
   gap: 10px;
-  margin: 12px 0 16px;
+  margin: 10px 0 6px;
   padding: 10px 14px;
-  border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  border-radius: 999px;
+  border: 1px solid rgba(255, 105, 180, .22);
+  background: rgba(255, 255, 255, .66);
+  box-shadow: var(--shadow2);
   font-weight: 900;
-  letter-spacing: 0.05em;
   position: relative;
   overflow: hidden;
 
-  /* ✅ フォールバック（背景クリップが効かない環境でも文字が消えない） */
-  color: #fff;
+  /* フォールバック（環境で背景クリップが効かなくても読める） */
+  color: var(--pink);
 }
 
-/* 背景クリップ対応時だけグラデ文字にする */
-@supports (-webkit-background-clip: text) {
-  .godBadge {
-    background-image: linear-gradient(90deg, #7dd3fc, #a5b4fc, #f0abfc, #6ee7b7);
-
-    /* 追加する */
-    background-clip: text;
-    -webkit-background-clip: text;
-
-    color: transparent;
-  }
-}
-
-/* キラッと流れる光（文字を潰さないよう薄め＆重ね方を調整） */
-.godBadge::after {
-  content: "";
-  position: absolute;
-  inset: -40%;
-  background: linear-gradient(
-    110deg,
-    transparent 30%,
-    rgba(255, 255, 255, 0.28) 50%,
-    transparent 70%
-  );
+.godBadge::after{
+  content:"";
+  position:absolute;
+  inset:-40%;
+  background: linear-gradient(110deg, transparent 30%, rgba(255,255,255,.35) 50%, transparent 70%);
   transform: translateX(-60%);
   animation: godShimmer 2.2s linear infinite;
   pointer-events: none;
-  mix-blend-mode: screen;
 }
 
-@keyframes godShimmer {
-  to { transform: translateX(60%); }
+@keyframes godShimmer{
+  to{ transform: translateX(60%); }
 }
 
-.godBadgeSub {
+.godBadgeSub{
   font-size: 12px;
-  font-weight: 800;
-  opacity: 0.85;
+  font-weight: 900;
+  color: var(--sub);
+  opacity: .9;
 }
 
-/* 🌸 神清潔ピンク浄化ゲージ */
-.godGaugePink {
-  background: linear-gradient(
-    90deg,
-    #f9a8d4,
-    #fbcfe8,
-    #fce7f3
-  );
-  box-shadow: 0 0 14px rgba(249, 168, 212, 0.7);
-  transition: background 0.4s ease, box-shadow 0.4s ease;
+/* 🌸 神清潔ピンク浄化ゲージ（App.tsxで gaugeFill に追加される） */
+.godGaugePink{
+  background: linear-gradient(90deg, #ff7dbb, #ffb2da, #ffe1f1);
+  box-shadow: 0 0 14px rgba(255, 125, 187, .55);
+  transition: background .4s ease, box-shadow .4s ease;
+}
+
+/* アクセシビリティ：アニメ抑制 */
+@media (prefers-reduced-motion: reduce){
+  .godToastInner{ animation: none; }
+  .godBadge::after{ animation: none; }
+  .gaugeFill{ transition: none; }
+  .puni-btn{ transition: none; }
 }
