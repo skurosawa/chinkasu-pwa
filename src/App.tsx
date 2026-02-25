@@ -33,9 +33,12 @@ export default function App() {
 
   const [lastBathPoint, setLastBathPoint] = useState<number | null>(null)
 
-  // ✅ 神清潔達成トースト
+  // ✅ 神清潔トースト（7日到達した瞬間だけ）
   const [showGodToast, setShowGodToast] = useState(false)
   const prevStreakRef = useRef<number>(cleanStreak)
+
+  // ✅ 常時神清潔モード判定
+  const isGodClean = cleanStreak >= 7
 
   // 起動時に履歴の最新を読む
   useEffect(() => {
@@ -44,7 +47,7 @@ export default function App() {
     setLastBathPoint(last ? last.pointBefore : null)
   }, [])
 
-  // ✅ cleanStreak が 6→7 になった瞬間だけ祝う（達成演出）
+  // ✅ 7日到達した瞬間だけ祝う
   useEffect(() => {
     const prev = prevStreakRef.current
 
@@ -69,6 +72,11 @@ export default function App() {
 
   const dangerPercent = Math.round((point / MAX_POINT) * 100)
   const isDanger = point >= 24
+
+  // ✅ 神清潔中はピンク浄化ゲージにする
+  const gaugeFillClass = isGodClean
+    ? 'gaugeFill godGaugePink'
+    : 'gaugeFill'
 
   const badge = () => {
     if (point === 0) return 'きらきら清潔✨'
@@ -113,20 +121,28 @@ export default function App() {
 
   return (
     <div className="app">
-      <h1>ちんかすカウンター🫧</h1>
+      <h1>ふろキャン♡ 🫧</h1>
+
+      {/* ✅ ヘッダー直下 神清潔モードバッジ */}
+      {isGodClean && (
+        <div className="godBadge">
+          ✨ 神清潔モード ✨
+          <span className="godBadgeSub">清潔連続 {cleanStreak} 日</span>
+        </div>
+      )}
 
       <div className="card">
         <p>現在ポイント（1時間で+1）</p>
 
         <div className="count">{point}</div>
 
-        {/* 危険度ゲージ */}
+        {/* 危険度ゲージ（神清潔中はピンク浄化） */}
         <div className="gauge">
-          <div className="gaugeFill" style={{ width: `${dangerPercent}%` }} />
+          <div className={gaugeFillClass} style={{ width: `${dangerPercent}%` }} />
         </div>
 
         <div className={`gaugeLabel ${isDanger ? 'danger' : ''}`}>
-          危険度: {dangerPercent}%
+          {isGodClean ? '神浄化度' : '危険度'}: {dangerPercent}%
         </div>
 
         <div className="badge">{badge()}</div>

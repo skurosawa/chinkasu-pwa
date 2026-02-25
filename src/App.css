@@ -5,6 +5,7 @@
   text-align: center;
 }
 
+/* ---- Viteテンプレのロゴ系（使ってないなら削除してOK） ---- */
 .logo {
   height: 6em;
   padding: 1.5em;
@@ -19,12 +20,8 @@
 }
 
 @keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -33,6 +30,7 @@
   }
 }
 
+/* ⚠️ .card は App 側でも使ってるので、ここは“最小”にして事故を防ぐ */
 .card {
   padding: 2em;
 }
@@ -41,7 +39,8 @@
   color: #888;
 }
 
-.godToast{
+/* ---- 神清潔トースト ---- */
+.godToast {
   position: fixed;
   inset: 0;
   display: flex;
@@ -51,21 +50,94 @@
   z-index: 9999;
 }
 
-.godToastInner{
+.godToastInner {
   padding: 14px 18px;
   border-radius: 16px;
   font-weight: 900;
-  background: rgba(0,0,0,.6);
-  border: 1px solid rgba(255,255,255,.2);
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   animation: godPop 1.6s ease both;
-  color: white;
+  color: #fff;
 }
 
-@keyframes godPop{
-  0% { transform: translateY(12px) scale(.96); opacity: 0; }
-  18% { transform: translateY(0) scale(1.02); opacity: 1; }
-  70% { transform: translateY(0) scale(1); opacity: 1; }
-  100% { transform: translateY(-8px) scale(.98); opacity: 0; }
+@keyframes godPop {
+  0%   { transform: translateY(12px) scale(0.96); opacity: 0; }
+  18%  { transform: translateY(0) scale(1.02);   opacity: 1; }
+  70%  { transform: translateY(0) scale(1);      opacity: 1; }
+  100% { transform: translateY(-8px) scale(0.98); opacity: 0; }
+}
+
+/* ---- 神清潔バッジ（ヘッダー下） ---- */
+.godBadge {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 10px;
+  margin: 12px 0 16px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  position: relative;
+  overflow: hidden;
+
+  /* ✅ フォールバック（背景クリップが効かない環境でも文字が消えない） */
+  color: #fff;
+}
+
+/* 背景クリップ対応時だけグラデ文字にする */
+@supports (-webkit-background-clip: text) {
+  .godBadge {
+    background-image: linear-gradient(90deg, #7dd3fc, #a5b4fc, #f0abfc, #6ee7b7);
+
+    /* 追加する */
+    background-clip: text;
+    -webkit-background-clip: text;
+
+    color: transparent;
+  }
+}
+
+/* キラッと流れる光（文字を潰さないよう薄め＆重ね方を調整） */
+.godBadge::after {
+  content: "";
+  position: absolute;
+  inset: -40%;
+  background: linear-gradient(
+    110deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.28) 50%,
+    transparent 70%
+  );
+  transform: translateX(-60%);
+  animation: godShimmer 2.2s linear infinite;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+
+@keyframes godShimmer {
+  to { transform: translateX(60%); }
+}
+
+.godBadgeSub {
+  font-size: 12px;
+  font-weight: 800;
+  opacity: 0.85;
+}
+
+/* 🌸 神清潔ピンク浄化ゲージ */
+.godGaugePink {
+  background: linear-gradient(
+    90deg,
+    #f9a8d4,
+    #fbcfe8,
+    #fce7f3
+  );
+  box-shadow: 0 0 14px rgba(249, 168, 212, 0.7);
+  transition: background 0.4s ease, box-shadow 0.4s ease;
 }
