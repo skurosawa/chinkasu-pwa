@@ -1,8 +1,8 @@
+/* 🌸 ふろキャン♡ グローバルテーマ */
+
 :root{
   --bg0:#fff7fb;
   --bg1:#fff1fa;
-  --card:#ffffffcc;
-  --line:rgba(255, 105, 180, .18);
 
   --text:#2b2230;
   --sub:#6b5b6e;
@@ -10,17 +10,11 @@
   --pink:#ff5fa2;
   --pink2:#ffa6d4;
   --pink3:#ffd1e8;
-
-  --shadow: 0 10px 30px rgba(255, 105, 180, .14);
-  --shadow2: 0 6px 16px rgba(17, 24, 39, .08);
-
-  --r-xl: 26px;
-  --r-lg: 18px;
-
-  --tap: 52px;
 }
 
-*{ box-sizing:border-box; }
+*{
+  box-sizing: border-box;
+}
 
 html, body{
   height:100%;
@@ -28,16 +22,30 @@ html, body{
 
 body{
   margin:0;
+  font-family: ui-rounded, system-ui, -apple-system,
+    "SF Pro Rounded",
+    "Hiragino Sans",
+    "Noto Sans JP",
+    sans-serif;
+
   color: var(--text);
-  font-family: ui-rounded, system-ui, -apple-system, "SF Pro Rounded", "Hiragino Sans", "Noto Sans JP", sans-serif;
+
   background:
     radial-gradient(1200px 600px at 20% 0%, rgba(255, 95, 162, .16), transparent 60%),
     radial-gradient(900px 500px at 90% 30%, rgba(255, 166, 212, .18), transparent 60%),
     linear-gradient(180deg, var(--bg0), var(--bg1));
 }
 
-a{ color: inherit; }
+#root{
+  min-height:100%;
+}
 
+/* テキスト選択色 */
 ::selection{
   background: rgba(255, 95, 162, .25);
+}
+
+/* タップ時の青ハイライト除去（iOS用） */
+button{
+  -webkit-tap-highlight-color: transparent;
 }
