@@ -34,33 +34,30 @@ export default function App() {
 
   const [lastBathPoint, setLastBathPoint] = useState<number | null>(null)
 
-  // ✅ 神清潔トースト（7日到達した瞬間だけ）
+  // 神清潔トースト
   const [showGodToast, setShowGodToast] = useState(false)
   const prevStreakRef = useRef<number>(cleanStreak)
 
-  // ✅ 常時神清潔モード判定
   const isGodClean = cleanStreak >= 7
 
-  // 起動時に履歴の最新を読む
+  // 起動時に履歴読み込み
   useEffect(() => {
     const events = loadBathEvents()
     const last = events.at(-1)
     setLastBathPoint(last ? last.pointBefore : null)
   }, [])
 
-  // ✅ 7日到達した瞬間だけ祝う
+  // 7日到達時トースト
   useEffect(() => {
     const prev = prevStreakRef.current
-
     if (prev < 7 && cleanStreak >= 7) {
       setShowGodToast(true)
       window.setTimeout(() => setShowGodToast(false), 1600)
     }
-
     prevStreakRef.current = cleanStreak
   }, [cleanStreak])
 
-  // 1分ごとにポイント再計算
+  // 1分ごと再計算
   useEffect(() => {
     const tick = () => {
       const p = calcPoint(nowMs(), lastResetAt, MAX_POINT)
@@ -74,7 +71,6 @@ export default function App() {
   const dangerPercent = Math.round((point / MAX_POINT) * 100)
   const isDanger = point >= 24
 
-  // ✅ 神清潔中はピンク浄化ゲージにする
   const gaugeFillClass = isGodClean
     ? 'gaugeFill godGaugePink'
     : 'gaugeFill'
@@ -120,15 +116,37 @@ export default function App() {
     }
   }
 
+  // 🫧 直近7日リセット回数
+  const weeklyCounts = useMemo(() => {
+    const events = loadBathEvents()
+    const result: { day: string; count: number }[] = []
+    const now = new Date()
+
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(now)
+      d.setDate(now.getDate() - i)
+
+      const key = d.toLocaleDateString('ja-JP', {
+        timeZone: 'Asia/Tokyo',
+      })
+
+      const count = events.filter((e) => e.dayKey === key).length
+      result.push({ day: key.slice(5), count })
+    }
+
+    return result
+  }, [cleanStreak, lastBathPoint])
+
   return (
     <div className="app">
       <h1>ふろキャン♡ 🫧</h1>
 
-      {/* ✅ ヘッダー直下 神清潔モードバッジ */}
       {isGodClean && (
         <div className="godBadge">
           ✨ 神清潔モード ✨
-          <span className="godBadgeSub">清潔連続 {cleanStreak} 日</span>
+          <span className="godBadgeSub">
+            清潔連続 {cleanStreak} 日
+          </span>
         </div>
       )}
 
@@ -137,9 +155,11 @@ export default function App() {
 
         <div className="count">{point}</div>
 
-        {/* 危険度ゲージ（神清潔中はピンク浄化） */}
         <div className="gauge">
-          <div className={gaugeFillClass} style={{ width: `${dangerPercent}%` }} />
+          <div
+            className={gaugeFillClass}
+            style={{ width: `${dangerPercent}%` }}
+          />
         </div>
 
         <div className={`gaugeLabel ${isDanger ? 'danger' : ''}`}>
@@ -167,10 +187,28 @@ export default function App() {
         </span>
       </div>
 
-      {/* ✅ 神清潔達成トースト（7日到達した瞬間だけ表示） */}
+      {/* 🫧 履歴グラフ */}
+      <div className="history">
+        <p className="historyTitle">🫧 直近7日リセット</p>
+
+        <div className="historyBars">
+          {weeklyCounts.map((d) => (
+            <div key={d.day} className="historyItem">
+              <div
+                className="historyBar"
+                style={{ height: `${d.count * 16}px` }}
+              />
+              <span className="historyDay">{d.day}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {showGodToast && (
         <div className="godToast" aria-live="polite">
-          <div className="godToastInner">✨ 神清潔達成！ ✨</div>
+          <div className="godToastInner">
+            ✨ 神清潔達成！ ✨
+          </div>
         </div>
       )}
     </div>
