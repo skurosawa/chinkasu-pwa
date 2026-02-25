@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { calcPoint, MAX_POINT } from './lib/points'
 import { loadBathEvents, appendBathEvent } from './lib/bathHistory'
 
@@ -33,12 +33,28 @@ export default function App() {
 
   const [lastBathPoint, setLastBathPoint] = useState<number | null>(null)
 
+  // ✅ 神清潔達成トースト
+  const [showGodToast, setShowGodToast] = useState(false)
+  const prevStreakRef = useRef<number>(cleanStreak)
+
   // 起動時に履歴の最新を読む
   useEffect(() => {
     const events = loadBathEvents()
     const last = events.at(-1)
     setLastBathPoint(last ? last.pointBefore : null)
   }, [])
+
+  // ✅ cleanStreak が 6→7 になった瞬間だけ祝う（達成演出）
+  useEffect(() => {
+    const prev = prevStreakRef.current
+
+    if (prev < 7 && cleanStreak >= 7) {
+      setShowGodToast(true)
+      window.setTimeout(() => setShowGodToast(false), 1600)
+    }
+
+    prevStreakRef.current = cleanStreak
+  }, [cleanStreak])
 
   // 1分ごとにポイント再計算
   useEffect(() => {
@@ -106,10 +122,7 @@ export default function App() {
 
         {/* 危険度ゲージ */}
         <div className="gauge">
-          <div
-            className="gaugeFill"
-            style={{ width: `${dangerPercent}%` }}
-          />
+          <div className="gaugeFill" style={{ width: `${dangerPercent}%` }} />
         </div>
 
         <div className={`gaugeLabel ${isDanger ? 'danger' : ''}`}>
@@ -136,6 +149,13 @@ export default function App() {
           直近🛁: {lastBathPoint === null ? '-' : `${lastBathPoint}→0`}
         </span>
       </div>
+
+      {/* ✅ 神清潔達成トースト（7日到達した瞬間だけ表示） */}
+      {showGodToast && (
+        <div className="godToast" aria-live="polite">
+          <div className="godToastInner">✨ 神清潔達成！ ✨</div>
+        </div>
+      )}
     </div>
   )
 }
