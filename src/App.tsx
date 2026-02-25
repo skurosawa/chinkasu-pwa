@@ -1,3 +1,4 @@
+import './App.css'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { calcPoint, MAX_POINT } from './lib/points'
 import { loadBathEvents, appendBathEvent } from './lib/bathHistory'
