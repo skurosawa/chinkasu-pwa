@@ -68,7 +68,6 @@ export default function App() {
     Number(safeGet('bestCleanStreak') ?? '0'),
   )
 
-  const [lastBathPoint, setLastBathPoint] = useState<number | null>(null)
   const [bathFx, setBathFx] = useState(false)
 
   const cleanTier = useMemo(() => {
@@ -81,12 +80,6 @@ export default function App() {
 
   const isGodClean = cleanTier.key !== 'none'
   const historyRange: 7 | 30 = isGodClean ? 30 : 7
-
-  useEffect(() => {
-    const events = loadBathEvents()
-    const last = events.at(-1)
-    setLastBathPoint(last ? last.pointBefore : null)
-  }, [])
 
   useEffect(() => {
     const todayKey = getTodayKeyJST()
@@ -133,12 +126,10 @@ export default function App() {
     setBathFx(true)
     window.setTimeout(() => setBathFx(false), 400)
 
-    const before = point
     const t = nowMs()
     const todayKey = getTodayKeyJST()
 
-    appendBathEvent({ ts: t, dayKey: todayKey, pointBefore: before })
-    setLastBathPoint(before)
+    appendBathEvent({ ts: t, dayKey: todayKey, pointBefore: point })
 
     safeSet('lastResetAt', String(t))
     setLastResetAt(t)
@@ -188,11 +179,22 @@ export default function App() {
           },
     )
 
-    return { max, items }
-  }, [historyRange, cleanStreak, lastBathPoint])
+    return { items }
+  }, [historyRange, cleanStreak])
 
   return (
     <div className="app">
+      <header className="top">
+        <div className="brand">
+          <h1 className="brandTitle">ふろキャン♡</h1>
+          {isGodClean && (
+            <span className={`godBadge godBadge--${cleanTier.key}`}>
+              {cleanTier.badge} {cleanTier.label}
+            </span>
+          )}
+        </div>
+      </header>
+
       <main className="stage">
         <section className="hero">
           <div className="heroNumber">
@@ -223,62 +225,58 @@ export default function App() {
           <div className="panelHeader">
             <h2 className="panelTitle">履歴</h2>
 
-            <div className="panelHint">
-              <button
-                type="button"
-                className="shareBtn"
-                onClick={onShare}
-                aria-label="共有"
+            <button
+              type="button"
+              className="shareBtn"
+              onClick={onShare}
+              aria-label="共有"
+            >
+              <svg
+                className="shareIcon"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
               >
-                <svg
-                  className="shareIcon"
-                  viewBox="0 0 24 24"
-                  aria-hidden="true"
-                >
-                  <path
-                    d="M7 10.5H6.5c-1.1 0-2 .9-2 2v6.5c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2v-6.5c0-1.1-.9-2-2-2H17"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M12 14V3.5"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                  />
-                  <path
-                    d="M8.7 6.8 12 3.5l3.3 3.3"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </button>
-            </div>
+                <path
+                  d="M7 10.5H6.5c-1.1 0-2 .9-2 2v6.5c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2v-6.5c0-1.1-.9-2-2-2H17"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M12 14V3.5"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                />
+                <path
+                  d="M8.7 6.8 12 3.5l3.3 3.3"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
           </div>
 
-          <div className="historyBody">
-            <div className="historyBars">
-              {historyData.items.map((d) => (
-                <div key={d.key} className="historyItem">
-                  {d.height > 0 ? (
-                    <div
-                      className="historyBar"
-                      style={{ height: `${d.height}px` }}
-                    />
-                  ) : (
-                    <div className="historyDot" />
-                  )}
-                  <span className="historyDay">{d.label}</span>
-                </div>
-              ))}
-            </div>
+          <div className="historyBars">
+            {historyData.items.map((d) => (
+              <div key={d.key} className="historyItem">
+                {d.height > 0 ? (
+                  <div
+                    className="historyBar"
+                    style={{ height: `${d.height}px` }}
+                  />
+                ) : (
+                  <div className="historyDot" />
+                )}
+                <span className="historyDay">{d.label}</span>
+              </div>
+            ))}
           </div>
         </section>
       </main>

@@ -3,7 +3,6 @@
   --bg1: #fff1fa;
 
   --card: rgba(255, 255, 255, 0.78);
-  --panel: rgba(255, 255, 255, 0.66);
   --panel2: rgba(255, 255, 255, 0.46);
 
   --line: rgba(255, 105, 180, 0.16);
@@ -15,29 +14,15 @@
   --pink2: #ffa6d4;
   --pink3: #ffd1e8;
 
-  /* 影を少し繊細に */
   --shadow: 0 10px 26px rgba(255, 105, 180, 0.12);
-  --shadow2: 0 6px 14px rgba(17, 24, 39, 0.07);
 
   --r-xl: 26px;
-  --r-lg: 18px;
-  --r-md: 16px;
-
-  --s-1: 6px;
-  --s-2: 10px;
-  --s-3: 14px;
-  --s-4: 18px;
-  --s-5: 24px;
-  --s-6: 32px;
-
-  --tap: 52px;
 }
 
 * {
   box-sizing: border-box;
 }
 
-/* ✅ iOS Safari / PWAでの土台を安定化 */
 html,
 body {
   height: 100%;
@@ -52,70 +37,16 @@ body {
       transparent 60%
     ),
     linear-gradient(180deg, var(--bg0), var(--bg1));
-  -webkit-text-size-adjust: 100%;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    "Hiragino Sans", "Noto Sans JP", "Helvetica Neue", Arial, sans-serif;
-
+  font-family: system-ui, -apple-system, "Hiragino Sans", "Noto Sans JP",
+    "Helvetica Neue", Arial, sans-serif;
   -webkit-tap-highlight-color: transparent;
 }
-
-/* ---------- App Shell ---------- */
 
 .app {
   max-width: 520px;
   margin: 0 auto;
   padding: calc(18px + env(safe-area-inset-top)) 14px
     calc(28px + env(safe-area-inset-bottom));
-  color: var(--text);
-  position: relative;
-}
-
-/* ✅ 危険域の空気（うっすら曇る） */
-.app::before {
-  content: "";
-  position: absolute;
-  inset: -8px;
-  pointer-events: none;
-  border-radius: 24px;
-
-  opacity: 0;
-  transition: opacity 0.25s ease;
-
-  background: radial-gradient(
-      900px 420px at 50% -120px,
-      rgba(167, 78, 156, 0.22),
-      transparent 62%
-    ),
-    radial-gradient(
-      700px 520px at 50% 110%,
-      rgba(55, 30, 65, 0.10),
-      transparent 60%
-    );
-}
-
-.app.dangerMode::before {
-  opacity: 1;
-}
-
-/* ✅ “押せるのは🛁だけ”を視覚的に守る */
-.top,
-.brand,
-.badgeStamp,
-.hero,
-.heroMeta,
-.tag,
-.notes,
-.tauntLine,
-.statsInline,
-.historyPanel,
-.panelHeader,
-.panelHint,
-.historyBody,
-.historyDay,
-.historyMeta,
-.godBadge {
-  cursor: default;
-  user-select: none;
 }
 
 /* ---------- Layout ---------- */
@@ -123,193 +54,57 @@ body {
 .stage {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 20px;
 }
 
-/* ---------- Top ---------- */
-
-.top {
-  padding-top: env(safe-area-inset-top);
-}
-
-/* ✅ タイトル/刻印を中央に揃えて“芯”を一本にする */
-.brand {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--s-2);
-  margin: 0 0 var(--s-4);
-}
-
-.brandTitle {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 900;
-  letter-spacing: 0.04em;
-  color: rgba(107, 91, 110, 0.88);
-  text-align: center;
-}
-
-.badgeStamp {
-  display: flex;
-  align-items: center;
-  gap: var(--s-1);
-}
-
-.badgeStamp * {
-  cursor: default !important;
-}
-
-/* 既存 godBadge を “ヘッダー刻印” として軽く */
-.godBadge {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 10px;
-  padding: 8px 12px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 105, 180, 0.18);
-  background: rgba(255, 255, 255, 0.58);
-  box-shadow: none;
-  font-weight: 900;
-  color: var(--pink);
-  position: relative;
-  overflow: hidden;
-}
-
-.godBadge--none {
-  padding: 0;
-  border: 0;
-  background: transparent;
-}
-
-.godBadge::after {
-  content: "";
-  position: absolute;
-  inset: -40%;
-  background: linear-gradient(
-    110deg,
-    transparent 30%,
-    rgba(255, 255, 255, 0.30) 50%,
-    transparent 70%
-  );
-  transform: translateX(-60%);
-  animation: godShimmer 2.2s linear infinite;
-  pointer-events: none;
-  mix-blend-mode: screen;
-}
-
-@keyframes godShimmer {
-  to {
-    transform: translateX(60%);
-  }
-}
-
-/* 段階色（控えめに差を出す） */
-.godBadge--god {
-  color: var(--pink);
-}
-.godBadge--super {
-  color: #c026d3;
-}
-.godBadge--legend {
-  color: #b45309;
-}
-
-/* ---------- Hero (主役) ---------- */
+/* ---------- Hero ---------- */
 
 .hero {
-  padding: var(--s-5) var(--s-4);
+  position: relative;
+  padding: 28px 18px;
   border-radius: var(--r-xl);
   background: var(--card);
   border: 1px solid var(--line);
   box-shadow: var(--shadow);
   backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  position: relative;
-  z-index: 1;
   text-align: center;
+}
+
+/* ✨ ほんのり空気感を戻す */
+.hero::after {
+  content: "";
+  position: absolute;
+  inset: -40px -20px;
+  background: radial-gradient(
+    500px 220px at 50% 0%,
+    rgba(255, 95, 162, 0.10),
+    transparent 70%
+  );
+  z-index: -1;
+  pointer-events: none;
 }
 
 .heroNumber {
   display: flex;
   align-items: baseline;
-  gap: var(--s-2);
   justify-content: center;
+  gap: 8px;
 }
 
 .heroValue {
   font-size: 64px;
   font-weight: 900;
-  line-height: 1;
-  letter-spacing: 0.02em;
-  transform: translateZ(0);
 }
 
 .heroUnit {
   font-size: 12px;
   font-weight: 900;
-  letter-spacing: 0.06em;
-  color: rgba(107, 91, 110, 0.72);
-  transform: translateY(-2px);
-}
-
-/* ✅ ポイント増加の瞬間だけ「ふわっ」 */
-.heroValue.pulse {
-  animation: countPulse 0.26s ease both;
-}
-
-@keyframes countPulse {
-  0% {
-    transform: translateY(0) scale(1);
-    filter: brightness(1);
-  }
-  55% {
-    transform: translateY(-2px) scale(1.04);
-    filter: brightness(1.03);
-  }
-  100% {
-    transform: translateY(0) scale(1);
-    filter: brightness(1);
-  }
-}
-
-/* meta tags（印刷物っぽく） */
-.heroMeta {
-  margin-top: var(--s-3);
-  display: flex;
-  gap: var(--s-2);
-  flex-wrap: wrap;
-  justify-content: center;
-}
-
-.tag {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 6px 10px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 105, 180, 0.14);
-  background: rgba(255, 255, 255, 0.55);
-  font-weight: 900;
-  font-size: 12px;
-  color: rgba(107, 91, 110, 0.82);
-  -webkit-tap-highlight-color: transparent;
-}
-
-.tag--danger {
-  color: rgba(43, 34, 48, 0.88);
-  border-color: rgba(255, 105, 180, 0.16);
-}
-
-.tag--status {
-  color: rgba(107, 91, 110, 0.84);
+  color: var(--sub);
 }
 
 .gaugeWrap {
-  margin-top: var(--s-4);
+  margin-top: 18px;
 }
-
-/* ---------- Gauge ---------- */
 
 .gauge {
   height: 16px;
@@ -326,144 +121,14 @@ body {
   transition: width 0.25s ease;
 }
 
-/* ✅ God Gauge (pink glow) */
-.godGaugePink {
-  background: linear-gradient(90deg, #ff7dbb, #ffb2da, #ffe1f1);
-  box-shadow: 0 0 14px rgba(255, 125, 187, 0.45);
-  transition: background 0.4s ease, box-shadow 0.4s ease;
-}
-
-/* ✅ 0%のときは“ただの薄いレール”にして主張を落とす */
-.gauge.isZero {
-  background: rgba(255, 105, 180, 0.06);
-  border-color: rgba(255, 105, 180, 0.08);
-}
-
-.gauge.isZero .gaugeFill {
-  box-shadow: none;
-}
-
-/* ===== 浄化ゲージ強化 ===== */
-
-.gaugeFill {
-  position: relative;
-  overflow: hidden;
-}
-
-/* 内側ミルキー発光 */
-.gaugeFill::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(
-    120% 140% at 20% 30%,
-    rgba(255, 255, 255, 0.45),
-    transparent 60%
-  );
-  opacity: 0.5;
-  pointer-events: none;
-}
-
-/* ゆっくり流れるハイライト */
-.gaugeFill::after {
-  content: "";
-  position: absolute;
-  inset: -40%;
-  background: linear-gradient(
-    110deg,
-    transparent 35%,
-    rgba(255, 255, 255, 0.55) 50%,
-    transparent 65%
-  );
-  transform: translateX(-60%);
-  animation: gaugeShimmer 3.6s linear infinite;
-  pointer-events: none;
-  mix-blend-mode: screen;
-}
-
-/* ===== 🛁ボタン儀式エフェクト ===== */
-
-.bathCta {
-  position: relative;
-  overflow: hidden;
-}
-
-/* きらっ */
-.bathCta.bathFx::after {
-  content: "";
-  position: absolute;
-  inset: -40%;
-  background: radial-gradient(
-    circle,
-    rgba(255, 255, 255, 0.9) 0%,
-    rgba(255, 255, 255, 0.4) 25%,
-    transparent 60%
-  );
-  animation: bathSparkle 0.4s ease-out;
-  pointer-events: none;
-}
-
-@keyframes bathSparkle {
-  0% {
-    opacity: 0.8;
-    transform: scale(0.8);
-  }
-  100% {
-    opacity: 0;
-    transform: scale(1.6);
-  }
-}
-
-/* 波紋 */
-.bathCta.bathFx::before {
-  animation: bathRipple 0.4s ease-out;
-}
-
-@keyframes bathRipple {
-  0% {
-    box-shadow: 0 0 0 0 rgba(255, 95, 162, 0.5);
-  }
-  100% {
-    box-shadow: 0 0 0 18px rgba(255, 95, 162, 0);
-  }
-}
-
-/* reduced motion */
-@media (prefers-reduced-motion: reduce) {
-  .bathCta.bathFx::after,
-  .bathCta.bathFx::before {
-    animation: none;
-  }
-}
-
-@keyframes gaugeShimmer {
-  to {
-    transform: translateX(60%);
-  }
-}
-
-/* reduced motion対応 */
-@media (prefers-reduced-motion: reduce) {
-  .gaugeFill::after {
-    animation: none;
-  }
-}
-
-/* ---------- CTA (唯一の強ボタン) ---------- */
+/* ---------- CTA ---------- */
 
 .cta {
   display: flex;
   justify-content: center;
-  position: relative;
-  z-index: 2;
 }
 
 .bathCta {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-
   min-height: 62px;
   padding: 16px 26px;
   width: min(360px, 100%);
@@ -473,246 +138,38 @@ body {
 
   font-weight: 900;
   font-size: 17px;
-  letter-spacing: 0.02em;
   color: #fff;
 
   background: linear-gradient(90deg, var(--pink), #ff79b8);
   box-shadow: 0 20px 44px rgba(255, 95, 162, 0.30);
 
-  outline: 1px solid rgba(255, 255, 255, 0.35);
-  outline-offset: -1px;
-
-  transform: translateY(0);
-  transition: transform 0.12s ease, filter 0.12s ease, box-shadow 0.2s ease;
-
-  -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
   cursor: pointer;
-
-  position: relative;
-}
-
-.bathCta::before {
-  content: "";
-  position: absolute;
-  inset: 2px;
-  border-radius: 999px;
-  background: radial-gradient(
-    120% 140% at 30% 20%,
-    rgba(255, 255, 255, 0.35),
-    transparent 55%
-  );
-  opacity: 0.75;
-  pointer-events: none;
+  transition: transform 0.12s ease;
 }
 
 .bathCta:active {
-  transform: translateY(1px) scale(0.99);
-  filter: brightness(0.98);
-  box-shadow: 0 14px 28px rgba(255, 95, 162, 0.26);
+  transform: scale(0.98);
 }
 
-.bathCta:focus-visible {
-  outline: 3px solid rgba(255, 95, 162, 0.35);
-  outline-offset: 4px;
-}
-
-.bathEmoji {
-  font-size: 20px;
-  line-height: 1;
-  transform: translateY(1px);
-}
-
-.bathLabel {
-  font-size: 16px;
-}
-
-/* ---------- Notes ---------- */
-
-.notes {
-  position: relative;
-  z-index: 1;
-  padding: 0 6px;
-  text-align: center;
-}
-
-.tauntLine {
-  margin: 0 0 var(--s-3);
-  padding: 0;
-  color: rgba(43, 34, 48, 0.92);
-  font-weight: 900;
-  line-height: 1.55;
-}
-
-.statsInline {
-  margin: 0;
-  padding: 10px 12px;
-  border-radius: 16px;
-
-  background: var(--panel2);
-  border: 1px dashed rgba(255, 105, 180, 0.18);
-
-  display: flex;
-  gap: 14px;
-  justify-content: center;
-  flex-wrap: wrap;
-
-  color: rgba(107, 91, 110, 0.86);
-  font-weight: 900;
-}
-
-.stat dt {
-  font-size: 12px;
-  letter-spacing: 0.04em;
-  margin-bottom: 2px;
-  color: rgba(107, 91, 110, 0.72);
-}
-
-.stat dd {
-  margin: 0;
-  font-size: 18px;
-  color: rgba(43, 34, 48, 0.92);
-}
-
-/* ---------- History panel ---------- */
+/* ---------- History ---------- */
 
 .historyPanel {
-  margin-top: 6px;
-  padding-top: var(--s-4);
+  margin-top: 24px; /* 少し下げて存在感UP */
+  padding-top: 20px;
   border-top: 1px solid rgba(255, 105, 180, 0.14);
-  position: relative;
-  z-index: 1;
 }
 
 .panelHeader {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 10px;
+  align-items: center;
 }
 
 .panelTitle {
-  margin: 0;
   font-weight: 900;
   font-size: 14px;
-  color: rgba(107, 91, 110, 0.86);
-}
-
-.panelHint {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 10px;
-  white-space: nowrap;
-  text-align: right;
-}
-
-.historyPill {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
-  padding: 6px 10px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 105, 180, 0.14);
-  background: rgba(255, 255, 255, 0.55);
-
-  font-weight: 900;
-  font-size: 12px;
-  color: rgba(107, 91, 110, 0.82);
-
-  position: relative;
-  overflow: hidden;
-  cursor: default;
-  user-select: none;
-}
-
-.historyPill.reward {
-  color: rgba(43, 34, 48, 0.92);
-  border-color: rgba(255, 105, 180, 0.22);
-  background: linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0.60),
-    rgba(255, 255, 255, 0.46)
-  );
-  box-shadow: 0 8px 18px rgba(255, 105, 180, 0.10);
-}
-
-.historyPill.unlockFx {
-  animation: rewardPop 1.1s ease both;
-}
-
-.historyPill.unlockFx::after {
-  content: "";
-  position: absolute;
-  inset: -40%;
-  background: linear-gradient(
-    110deg,
-    transparent 30%,
-    rgba(255, 255, 255, 0.55) 50%,
-    transparent 70%
-  );
-  transform: translateX(-70%);
-  animation: rewardShimmer 1.1s ease both;
-  pointer-events: none;
-  mix-blend-mode: screen;
-}
-
-@keyframes rewardPop {
-  0% {
-    transform: scale(0.98);
-    box-shadow: 0 0 0 rgba(255, 105, 180, 0);
-  }
-  25% {
-    transform: scale(1.04);
-    box-shadow: 0 14px 28px rgba(255, 105, 180, 0.16);
-  }
-  60% {
-    transform: scale(1.01);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
-@keyframes rewardShimmer {
-  0% {
-    transform: translateX(-70%);
-    opacity: 0;
-  }
-  25% {
-    opacity: 1;
-  }
-  100% {
-    transform: translateX(70%);
-    opacity: 0;
-  }
-}
-
-.historyLock {
-  font-size: 12px;
-  font-weight: 900;
-  color: rgba(107, 91, 110, 0.68);
-}
-
-.historyBody {
-  opacity: 0.98;
-}
-
-/* ✅ 履歴は触れない：棒/ドット/ラベルは非インタラクティブにする */
-.historyBars,
-.historyItem,
-.historyBar,
-.historyDot,
-.historyDay,
-.historyMeta {
-  pointer-events: none;
-}
-
-/* ※ 共有ボタンは例外で触れる（下で付与） */
-.historyBars * {
-  cursor: default !important;
+  color: var(--sub);
+  margin: 0;
 }
 
 .historyBars {
@@ -721,19 +178,7 @@ body {
   justify-content: space-between;
   height: 90px;
   gap: 8px;
-}
-
-.historyBars.monthly {
-  overflow-x: auto;
-  justify-content: flex-start;
-  padding-bottom: 6px;
-  scroll-snap-type: x proximity;
-  -webkit-overflow-scrolling: touch;
-}
-
-.historyBars.monthly .historyItem {
-  min-width: 26px;
-  scroll-snap-align: end;
+  margin-top: 12px;
 }
 
 .historyItem {
@@ -749,18 +194,14 @@ body {
   max-width: 28px;
   background: linear-gradient(180deg, #ff7dbb, #ffb2da);
   border-radius: 8px 8px 4px 4px;
-  transition: height 0.2s ease;
-  opacity: 0.92;
+  opacity: 1; /* ← 少し戻した */
 }
 
-/* ✅ 0回の日：薄いドット（“入ってない”の印） */
 .historyDot {
   width: 10px;
   height: 10px;
   border-radius: 999px;
-  background: rgba(255, 95, 162, 0.12);
-  border: 1px solid rgba(255, 95, 162, 0.10);
-  box-shadow: none;
+  background: rgba(255, 95, 162, 0.18);
 }
 
 .historyDay {
@@ -769,172 +210,8 @@ body {
   font-weight: 700;
 }
 
-.historyMeta {
-  margin-top: 8px;
-  font-size: 12px;
-  color: var(--sub);
-  font-weight: 800;
-}
+/* ---------- Share Button (icon only / pink) ---------- */
 
-/* ---------- Toasts ---------- */
-
-.godToast {
-  position: fixed;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
-  z-index: 9999;
-
-  padding: env(safe-area-inset-top) env(safe-area-inset-right)
-    env(safe-area-inset-bottom) env(safe-area-inset-left);
-}
-
-.godToastInner {
-  padding: 14px 18px;
-  border-radius: 18px;
-  font-weight: 900;
-  background: rgba(255, 255, 255, 0.72);
-  border: 1px solid rgba(255, 105, 180, 0.22);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  animation: godPop 1.6s ease both;
-  color: #3a2536;
-  box-shadow: var(--shadow);
-}
-
-@keyframes godPop {
-  0% {
-    transform: translateY(10px) scale(0.96);
-    opacity: 0;
-  }
-  18% {
-    transform: translateY(0) scale(1.02);
-    opacity: 1;
-  }
-  70% {
-    transform: translateY(0) scale(1);
-    opacity: 1;
-  }
-  100% {
-    transform: translateY(-8px) scale(0.98);
-    opacity: 0;
-  }
-}
-
-/* ---------- PWA Toast (non-interactive) ---------- */
-
-.pwaToast {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: calc(12px + env(safe-area-inset-bottom));
-  display: flex;
-  justify-content: center;
-  pointer-events: none;
-  z-index: 9998;
-}
-
-.pwaToastInner {
-  padding: 10px 14px;
-  border-radius: 999px;
-  font-weight: 900;
-  font-size: 12px;
-
-  background: rgba(255, 255, 255, 0.76);
-  border: 1px solid rgba(255, 105, 180, 0.18);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-
-  color: rgba(43, 34, 48, 0.92);
-  box-shadow: 0 10px 24px rgba(255, 105, 180, 0.14);
-
-  animation: pwaToastPop 1.8s ease both;
-}
-
-@keyframes pwaToastPop {
-  0% {
-    transform: translateY(8px) scale(0.98);
-    opacity: 0;
-  }
-  12% {
-    transform: translateY(0) scale(1.01);
-    opacity: 1;
-  }
-  78% {
-    transform: translateY(0) scale(1);
-    opacity: 1;
-  }
-  100% {
-    transform: translateY(-6px) scale(0.99);
-    opacity: 0;
-  }
-}
-
-/* ---------- Accessibility ---------- */
-
-@media (prefers-reduced-motion: reduce) {
-  .godToastInner {
-    animation: none;
-  }
-  .godBadge::after {
-    animation: none;
-  }
-  .gaugeFill {
-    transition: none;
-  }
-  .historyBar {
-    transition: none;
-  }
-  .bathCta {
-    transition: none;
-  }
-  .historyPill.unlockFx {
-    animation: none;
-  }
-  .historyPill.unlockFx::after {
-    animation: none;
-  }
-  .heroValue.pulse {
-    animation: none;
-  }
-  .app::before {
-    transition: none;
-  }
-  .pwaToastInner {
-    animation: none;
-  }
-}
-
-/* v0.7: 共有ボタン（補助UI / 触れる唯一の要素） */
-.shareBtn {
-  appearance: none;
-  -webkit-appearance: none;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  background: rgba(255, 255, 255, 0.10);
-  color: inherit;
-  border-radius: 999px;
-  padding: 6px 10px;
-  font-size: 12px;
-  line-height: 1;
-  user-select: none;
-
-  cursor: pointer;
-  pointer-events: auto;
-}
-
-.shareBtn:active {
-  transform: translateY(0.5px);
-}
-
-@media (hover: hover) {
-  .shareBtn:hover {
-    background: rgba(255, 255, 255, 0.14);
-  }
-}
-
-/* 共有ボタン（アイコンのみ・ピンク） */
 .shareBtn {
   appearance: none;
   -webkit-appearance: none;
@@ -952,17 +229,45 @@ body {
 
   cursor: pointer;
   pointer-events: auto;
-
-  -webkit-tap-highlight-color: transparent;
-  transition: background 0.15s ease, transform 0.1s ease;
+  transition: transform 0.1s ease;
 }
 
 .shareBtn:active {
-  transform: translateY(0.5px) scale(0.97);
+  transform: scale(0.96);
 }
 
 .shareIcon {
   width: 18px;
   height: 18px;
+  color: var(--pink);
+}
+
+/* ---------- Top ---------- */
+
+.top {
+  margin-bottom: 12px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.brandTitle {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 900;
+  color: rgba(107, 91, 110, 0.88);
+}
+
+.godBadge {
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 105, 180, 0.18);
+  background: rgba(255, 255, 255, 0.6);
+  font-weight: 900;
+  font-size: 12px;
   color: var(--pink);
 }
