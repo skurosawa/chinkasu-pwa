@@ -141,7 +141,6 @@ export default function App() {
 
     const diff = diffDaysByDayKey(todayKey, lastBathDay)
     if (diff !== null && diff >= 2) {
-      // 連続は途切れた（今日はまだ押してないので 0 表示が自然）
       setCleanStreak(0)
       safeSet('currentCleanStreak', '0')
     }
@@ -260,13 +259,8 @@ export default function App() {
     const diff = lastBathDay ? diffDaysByDayKey(todayKey, lastBathDay) : null
 
     let next = 1
-    if (diff === 1) {
-      // 昨日も押してる＝連続
-      next = cleanStreak + 1
-    } else {
-      // 一昨日以前 or 不明＝途切れたので1から
-      next = 1
-    }
+    if (diff === 1) next = cleanStreak + 1
+    else next = 1
 
     const nextBest = Math.max(bestClean, next)
 
@@ -291,7 +285,6 @@ export default function App() {
       const key = d.toLocaleDateString('ja-JP', { timeZone: 'Asia/Tokyo' })
       const count = events.filter((e) => e.dayKey === key).length
       const label = key.slice(5) // "MM/DD"
-
       days.push({ key, label, count })
     }
 
@@ -299,8 +292,9 @@ export default function App() {
     const maxHeight = 72
 
     const items = days.map((d) => {
+      // ✅ 空白の日も“うっすら存在”させて、右端1本の悪目立ちを軽減
       const height =
-        d.count === 0 ? 0 : Math.max(8, Math.round((d.count / max) * maxHeight))
+        d.count === 0 ? 6 : Math.max(10, Math.round((d.count / max) * maxHeight))
       return { ...d, height }
     })
 
@@ -320,26 +314,26 @@ export default function App() {
 
   return (
     <div className={`app ${isDanger ? 'dangerMode' : ''}`}>
-      {/* --- Top --- */}
       <header className="top">
         <div className="brand">
           <h1 className="brandTitle">ふろキャン♡</h1>
 
-          {/* 神清潔バッジ（押せない刻印） */}
           <div className="badgeStamp" aria-label="神清潔">
             {isGodClean ? (
               <span className={`godBadge godBadge--${cleanTier.key}`}>
                 {cleanTier.badge} {cleanTier.label}
               </span>
             ) : (
-              <span className="godBadge godBadge--none"> </span>
+              <span className="godBadge godBadge--none" aria-hidden="true">
+                {' '}
+              </span>
             )}
           </div>
         </div>
       </header>
 
       <main className="stage">
-        {/* --- Hero (主役：point) --- */}
+        {/* 主役：point */}
         <section className="hero" aria-label="現在のポイント">
           <div className="heroNumber">
             <span className={`heroValue ${countPulse ? 'pulse' : ''}`}>{point}</span>
@@ -361,20 +355,19 @@ export default function App() {
               <div className={gaugeFillClass} style={{ width: `${dangerPercent}%` }} />
             </div>
           </div>
-
-          {/* 旧カードの説明文は削除（“時間でふえる”など） */}
         </section>
 
-        {/* --- CTA (🛁 only) --- */}
+        {/* 準主役：🛁ボタン（目立たせる） */}
         <div className="cta">
-          <button className="bathCta" onClick={onBathReset} aria-label="おふろでリセット">
+          <button className="bathCta" onClick={onBathReset} aria-label="おふろ入った">
             <span className="bathEmoji" aria-hidden="true">
               🛁
             </span>
+            <span className="bathLabel">おふろ入った</span>
           </button>
         </div>
 
-        {/* --- Notes (taunt + stats) --- */}
+        {/* 補助：taunt / stats（芯を揃える） */}
         <section className="notes" aria-label="メッセージと統計">
           <p className="tauntLine">{taunt()}</p>
 
@@ -390,7 +383,7 @@ export default function App() {
           </dl>
         </section>
 
-        {/* --- History (別セクション・軽く) --- */}
+        {/* 履歴：別セクション */}
         <section className="historyPanel" aria-label="履歴">
           <div className="panelHeader">
             <h2 className="panelTitle">履歴</h2>

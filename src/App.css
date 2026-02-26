@@ -1,5 +1,4 @@
 :root {
-  /* --- Base palette (keep your current feel) --- */
   --bg0: #fff7fb;
   --bg1: #fff1fa;
 
@@ -16,16 +15,14 @@
   --pink2: #ffa6d4;
   --pink3: #ffd1e8;
 
-  /* --- Shadows (delicate) --- */
+  /* 影を少し繊細に */
   --shadow: 0 10px 26px rgba(255, 105, 180, 0.12);
   --shadow2: 0 6px 14px rgba(17, 24, 39, 0.07);
 
-  /* --- Radius --- */
   --r-xl: 26px;
   --r-lg: 18px;
   --r-md: 16px;
 
-  /* --- Spacing (token-ish) --- */
   --s-1: 6px;
   --s-2: 10px;
   --s-3: 14px;
@@ -114,7 +111,6 @@ body {
 .panelHeader,
 .panelHint,
 .historyBody,
-.historyBar,
 .historyDay,
 .historyMeta,
 .godBadge {
@@ -122,15 +118,17 @@ body {
   user-select: none;
 }
 
-/* ---------- New Layout (App.tsx v0.5.0) ---------- */
+/* ---------- Layout ---------- */
 
 .stage {
   display: flex;
   flex-direction: column;
-  gap: var(--s-5);
+  /* ✅ ボタンを目立たせたいので、hero→cta間を少し詰めて導線を強化 */
+  gap: 18px;
 }
 
-/* --- Top --- */
+/* ---------- Top ---------- */
+
 .top {
   padding-top: env(safe-area-inset-top);
 }
@@ -217,7 +215,8 @@ body {
   color: #b45309;
 }
 
-/* --- Hero (point) --- */
+/* ---------- Hero (主役) ---------- */
+
 .hero {
   padding: var(--s-5) var(--s-4);
   border-radius: var(--r-xl);
@@ -228,12 +227,16 @@ body {
   -webkit-backdrop-filter: blur(10px);
   position: relative;
   z-index: 1;
+
+  /* ✅ 重心を中央に戻す */
+  text-align: center;
 }
 
 .heroNumber {
   display: flex;
   align-items: baseline;
   gap: var(--s-2);
+  justify-content: center; /* ← 左重心解消 */
 }
 
 .heroValue {
@@ -272,12 +275,13 @@ body {
   }
 }
 
-/* meta tags (印刷物っぽく＝押せない) */
+/* meta tags（印刷物っぽく） */
 .heroMeta {
   margin-top: var(--s-3);
   display: flex;
   gap: var(--s-2);
   flex-wrap: wrap;
+  justify-content: center; /* ← 芯を揃える */
 }
 
 .tag {
@@ -307,7 +311,8 @@ body {
   margin-top: var(--s-4);
 }
 
-/* --- Gauge (reuse your existing look) --- */
+/* ---------- Gauge ---------- */
+
 .gauge {
   height: 16px;
   border-radius: 999px;
@@ -330,24 +335,40 @@ body {
   transition: background 0.4s ease, box-shadow 0.4s ease;
 }
 
-/* --- CTA (only button-like thing) --- */
+/* ---------- CTA (唯一の強ボタン) ---------- */
+
 .cta {
   display: flex;
   justify-content: center;
   position: relative;
-  z-index: 1;
+  z-index: 2;
 }
 
+/* ✅ 目立たせる：幅を持たせ、影・立体・視認性を強める */
 .bathCta {
-  width: 92px;
-  height: 92px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+
+  min-height: 62px;
+  padding: 16px 26px;
+  width: min(360px, 100%);
+
   border: 0;
-  border-radius: 28px;
+  border-radius: 999px;
+
   font-weight: 900;
+  font-size: 17px;
+  letter-spacing: 0.02em;
   color: #fff;
 
   background: linear-gradient(90deg, var(--pink), #ff79b8);
-  box-shadow: 0 14px 30px rgba(255, 95, 162, 0.28);
+  box-shadow: 0 20px 44px rgba(255, 95, 162, 0.30);
+
+  /* ほんのり縁取りで“ボタン”を強化 */
+  outline: 1px solid rgba(255, 255, 255, 0.35);
+  outline-offset: -1px;
 
   transform: translateY(0);
   transition: transform 0.12s ease, filter 0.12s ease, box-shadow 0.2s ease;
@@ -355,18 +376,29 @@ body {
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
   cursor: pointer;
+
+  position: relative;
 }
 
-.bathEmoji {
-  font-size: 38px;
-  line-height: 1;
-  display: inline-block;
-  transform: translateY(1px);
+/* ふわっと光の膜（押せる主役感） */
+.bathCta::before {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  border-radius: 999px;
+  background: radial-gradient(
+    120% 140% at 30% 20%,
+    rgba(255, 255, 255, 0.35),
+    transparent 55%
+  );
+  opacity: 0.75;
+  pointer-events: none;
 }
 
 .bathCta:active {
   transform: translateY(1px) scale(0.99);
   filter: brightness(0.98);
+  box-shadow: 0 14px 28px rgba(255, 95, 162, 0.26);
 }
 
 .bathCta:focus-visible {
@@ -374,12 +406,23 @@ body {
   outline-offset: 4px;
 }
 
-/* --- Notes (taunt + stats) --- */
+.bathEmoji {
+  font-size: 20px;
+  line-height: 1;
+  transform: translateY(1px);
+}
+
+.bathLabel {
+  font-size: 16px;
+}
+
+/* ---------- Notes（芯を揃える） ---------- */
+
 .notes {
   position: relative;
   z-index: 1;
   padding: 0 6px;
-  text-align: left;
+  text-align: center; /* ← 中央基準に統一して“芯”を作る */
 }
 
 .tauntLine {
@@ -401,7 +444,7 @@ body {
 
   display: flex;
   gap: 14px;
-  justify-content: flex-start;
+  justify-content: center; /* ← 中央寄せ */
   flex-wrap: wrap;
 
   color: rgba(107, 91, 110, 0.86);
@@ -421,9 +464,10 @@ body {
   color: rgba(43, 34, 48, 0.92);
 }
 
-/* --- History panel (separate + non-interactive) --- */
+/* ---------- History panel ---------- */
+
 .historyPanel {
-  margin-top: 2px;
+  margin-top: 6px;
   padding-top: var(--s-4);
   border-top: 1px solid rgba(255, 105, 180, 0.14);
   position: relative;
@@ -432,7 +476,7 @@ body {
 
 .panelHeader {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: 12px;
   margin-bottom: 10px;
@@ -445,15 +489,16 @@ body {
   color: rgba(107, 91, 110, 0.86);
 }
 
+/* ✅ 右側に“固める”ことで視線が散らない */
 .panelHint {
   display: flex;
   align-items: center;
   justify-content: flex-end;
   gap: 10px;
   white-space: nowrap;
+  text-align: right;
 }
 
-/* 既存の pill / lock を流用（押せない見た目維持） */
 .historyPill {
   display: inline-flex;
   align-items: center;
@@ -558,7 +603,6 @@ body {
   cursor: default !important;
 }
 
-/* --- History bars (reuse) --- */
 .historyBars {
   display: flex;
   align-items: flex-end;
@@ -595,6 +639,9 @@ body {
   background: linear-gradient(180deg, #ff7dbb, #ffb2da);
   border-radius: 8px 8px 4px 4px;
   transition: height 0.2s ease;
+
+  /* ✅ 0回の日でも存在感を“薄く” */
+  opacity: 0.92;
 }
 
 .historyDay {
@@ -739,15 +786,4 @@ body {
   .pwaToastInner {
     animation: none;
   }
-}
-
-/* ---------- Backward-compat (in case old classes remain somewhere) ---------- */
-/* 旧DOMが残っても “押せそう” が出ないように */
-.card,
-.badge,
-.taunt,
-.stats,
-.history {
-  cursor: default;
-  user-select: none;
 }
