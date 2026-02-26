@@ -3,29 +3,52 @@
   <head>
     <meta charset="UTF-8" />
 
+    <!-- Viewport: iOS safe-area 対応 -->
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     />
 
+    <!-- PWA / Theme -->
     <meta name="theme-color" content="#FF69B4" />
+    <meta
+      name="description"
+      content="ふろキャン♡｜ゆめかわ清潔で時間と戦う、ちょっと煽り系ジョークPWA🫧"
+    />
 
-    <!-- iOS PWA対応 -->
+    <!-- iOS PWA 対応 -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="ふろキャン" />
 
-    <!-- GitHub Pages base前提 -->
-    <link rel="icon" href="/chinkasu-pwa/icons/icon-192.png" />
+    <!-- Icons（GitHub Pages base: /chinkasu-pwa/） -->
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="192x192"
+      href="/chinkasu-pwa/icons/icon-192.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="512x512"
+      href="/chinkasu-pwa/icons/icon-512.png"
+    />
+
+    <!-- iOSホーム画面アイコン -->
     <link
       rel="apple-touch-icon"
-      href="/chinkasu-pwa/icons/icon-192.png"
+      sizes="180x180"
+      href="/chinkasu-pwa/icons/apple-touch-icon.png"
     />
 
     <title>ふろキャン♡</title>
   </head>
+
   <body>
     <div id="root"></div>
+
+    <!-- Vite entry（baseはvite.config.tsで設定済み） -->
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
