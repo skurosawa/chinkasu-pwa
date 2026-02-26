@@ -901,3 +901,26 @@ body {
     animation: none;
   }
 }
+
+/* v0.7: 共有ボタン（主張弱め・補助UIとして） */
+.shareBtn {
+  appearance: none;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.08);
+  color: inherit;
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 12px;
+  line-height: 1;
+  user-select: none;
+}
+
+.shareBtn:active {
+  transform: translateY(0.5px);
+}
+
+@media (hover: hover) {
+  .shareBtn:hover {
+    background: rgba(255, 255, 255, 0.12);
+  }
+}

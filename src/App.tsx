@@ -2,6 +2,7 @@ import './App.css'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { calcPoint, MAX_POINT } from './lib/points'
 import { loadBathEvents, appendBathEvent } from './lib/bathHistory'
+import { copyText, tryNativeShare } from './lib/share'
 
 const nowMs = () => Date.now()
 
@@ -107,6 +108,32 @@ export default function App() {
   // ✅ ごほうび解放：神清潔（7日以上）で30日履歴を自動解放
   const historyRange: 7 | 30 = isGodClean ? 30 : 7
   const historyRangeLabel = historyRange === 30 ? 'ごほうび30日' : '7日'
+
+  // ✅ トースト共通（PWAトーストUIを流用）
+  const toast = (text: string) => {
+    setPwaToastText(text)
+    setShowPwaToast(true)
+    window.setTimeout(() => setShowPwaToast(false), 1400)
+  }
+
+  // ✅ 共有テキスト（URLなし / 連続だけ / 神清潔で✨）
+  const buildShareText = () => {
+    const streakText = cleanStreak <= 1 ? '1日目' : `${cleanStreak}日連続`
+    const sparkle = cleanTier.key !== 'none' ? ' ✨' : ''
+    return `🛁 おふろ入った〜 🫧 ${streakText}${sparkle}\n#ふろキャン`
+  }
+
+  const onShare = async () => {
+    const text = buildShareText()
+
+    // 対応環境では共有シート（Xへ行ける）
+    const shared = await tryNativeShare({ text })
+    if (shared) return
+
+    // フォールバック：コピー
+    const copied = await copyText(text)
+    toast(copied ? '📋 シェア文をコピーした' : '⚠️ コピーできなかった')
+  }
 
   // ✅ PWA更新イベント受信（main.tsx から飛んでくる）
   useEffect(() => {
@@ -353,10 +380,7 @@ export default function App() {
           {/* ✅ 0%でもレールは見せる（塗りは0） */}
           <div className="gaugeWrap">
             <div className={`gauge ${dangerPercent === 0 ? 'isZero' : ''}`}>
-              <div
-                className={gaugeFillClass}
-                style={{ width: `${dangerPercent}%` }}
-              />
+              <div className={gaugeFillClass} style={{ width: `${dangerPercent}%` }} />
             </div>
           </div>
         </section>
@@ -394,6 +418,15 @@ export default function App() {
             <h2 className="panelTitle">履歴</h2>
 
             <span className="panelHint" aria-label="履歴レンジ">
+              <button
+                type="button"
+                className="shareBtn"
+                onClick={onShare}
+                aria-label="Xに共有"
+              >
+                共有
+              </button>
+
               <span
                 className={[
                   'historyPill',
@@ -423,7 +456,11 @@ export default function App() {
                       title={`${d.label}：${d.count}回`}
                     />
                   ) : (
-                    <div className="historyDot" title={`${d.label}：0回`} aria-hidden="true" />
+                    <div
+                      className="historyDot"
+                      title={`${d.label}：0回`}
+                      aria-hidden="true"
+                    />
                   )}
                   <span className="historyDay">{d.label}</span>
                 </div>
