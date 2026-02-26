@@ -100,18 +100,27 @@
 
 /* ---------- Status Badge ---------- */
 
-.badge {
+.badge{
   margin-top: 12px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 10px 12px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 105, 180, 0.18);
-  background: rgba(255, 255, 255, 0.82);
-  box-shadow: var(--shadow2);
+
+  /* “ボタン感”を消す */
+  padding: 8px 12px;
+  border-radius: 14px;                 /* pillをやめる */
+  border: 1px solid rgba(255,105,180,.12);
+  background: rgba(255,255,255,.55);   /* 透明寄り */
+  box-shadow: none;                    /* 影を消す */
+
   font-weight: 900;
+  color: var(--text);
+
+  /* 押せそうな挙動を消す */
+  cursor: default;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
 }
 
 /* ---------- Primary Button (only “button-like” thing) ---------- */
