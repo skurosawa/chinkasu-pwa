@@ -3,10 +3,11 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { calcPoint, MAX_POINT } from './lib/points'
 import { loadBathEvents, appendBathEvent } from './lib/bathHistory'
 
+const nowMs = () => Date.now()
+
+// ✅ JSTの「日付キー」(例: 2026/2/27) ※既存互換のため維持
 const getTodayKeyJST = () =>
   new Date().toLocaleDateString('ja-JP', { timeZone: 'Asia/Tokyo' })
-
-const nowMs = () => Date.now()
 
 // ✅ localStorage 例外対策（iOSプライベート/制限などで落ちないように）
 const safeGet = (key: string) => {
@@ -32,6 +33,28 @@ const getOrInitLastResetAt = () => {
   const t = nowMs()
   safeSet('lastResetAt', String(t))
   return t
+}
+
+// ✅ "YYYY/M/D" or "YYYY/MM/DD" or "YYYY-MM-DD" を安全にパース
+const parseDayKey = (key: string): { y: number; m: number; d: number } | null => {
+  if (!key) return null
+  const parts = key.split(/[^\d]+/).filter(Boolean).map(Number)
+  if (parts.length < 3) return null
+  const [y, m, d] = parts
+  if (!y || !m || !d) return null
+  return { y, m, d }
+}
+
+// ✅ JST日付キー同士の「日数差」を計算（today - last）
+const diffDaysByDayKey = (todayKey: string, lastKey: string): number | null => {
+  const a = parseDayKey(todayKey)
+  const b = parseDayKey(lastKey)
+  if (!a || !b) return null
+
+  // JSTの「日付」同士なので、UTCの同日0時にマップして差分を取ればOK
+  const dayA = Math.floor(Date.UTC(a.y, a.m - 1, a.d) / 86400000)
+  const dayB = Math.floor(Date.UTC(b.y, b.m - 1, b.d) / 86400000)
+  return dayA - dayB
 }
 
 export default function App() {
@@ -82,6 +105,20 @@ export default function App() {
     const events = loadBathEvents()
     const last = events.at(-1)
     setLastBathPoint(last ? last.pointBefore : null)
+  }, [])
+
+  // ✅ 起動時：前回が「一昨日以前」なら streak を折る（表示もリセット）
+  useEffect(() => {
+    const todayKey = getTodayKeyJST()
+    const lastBathDay = safeGet('lastBathDay') ?? ''
+    if (!lastBathDay) return
+
+    const diff = diffDaysByDayKey(todayKey, lastBathDay)
+    if (diff !== null && diff >= 2) {
+      // 連続は途切れた（今日はまだ押してないので 0 表示が自然）
+      setCleanStreak(0)
+      safeSet('currentCleanStreak', '0')
+    }
   }, [])
 
   // ✅ 7/14/30 到達した瞬間だけ祝う（段階が変わった瞬間に出す）
@@ -147,13 +184,10 @@ export default function App() {
   // ✅ ポイントが増えた瞬間だけ、数字をふわっと（押せない演出）
   useEffect(() => {
     const prev = prevPointRef.current
-
-    // 増加のみ（0→増加含む）。リセット時(大きく減る)は演出しない
     if (point > prev && point > 0) {
       setCountPulse(true)
       window.setTimeout(() => setCountPulse(false), 260)
     }
-
     prevPointRef.current = point
   }, [point])
 
@@ -182,8 +216,6 @@ export default function App() {
   const onBathReset = () => {
     const before = point
     const t = nowMs()
-
-    // ✅ 日付跨ぎ対策：押した瞬間の todayKey を使う
     const todayKey = getTodayKeyJST()
 
     appendBathEvent({ ts: t, dayKey: todayKey, pointBefore: before })
@@ -194,17 +226,30 @@ export default function App() {
     setPoint(0)
 
     const lastBathDay = safeGet('lastBathDay') ?? ''
-    if (lastBathDay !== todayKey) {
-      const next = cleanStreak + 1
-      const nextBest = Math.max(bestClean, next)
 
-      setCleanStreak(next)
-      setBestClean(nextBest)
+    // ✅ 同じ日は加算しない（多押し対策）
+    if (lastBathDay === todayKey) return
 
-      safeSet('currentCleanStreak', String(next))
-      safeSet('bestCleanStreak', String(nextBest))
-      safeSet('lastBathDay', todayKey)
+    // ✅ ここが変更点：日付差で「連続 or リセット」を決める
+    const diff = lastBathDay ? diffDaysByDayKey(todayKey, lastBathDay) : null
+
+    let next = 1
+    if (diff === 1) {
+      // 昨日も押してる＝連続
+      next = cleanStreak + 1
+    } else {
+      // 一昨日以前 or 不明＝途切れたので1から
+      next = 1
     }
+
+    const nextBest = Math.max(bestClean, next)
+
+    setCleanStreak(next)
+    setBestClean(nextBest)
+
+    safeSet('currentCleanStreak', String(next))
+    safeSet('bestCleanStreak', String(nextBest))
+    safeSet('lastBathDay', todayKey)
   }
 
   // 🫧 履歴（自動スケーリング + 7/30 自動）
@@ -217,12 +262,9 @@ export default function App() {
       const d = new Date(now)
       d.setDate(now.getDate() - i)
 
-      const key = d.toLocaleDateString('ja-JP', {
-        timeZone: 'Asia/Tokyo',
-      })
-
+      const key = d.toLocaleDateString('ja-JP', { timeZone: 'Asia/Tokyo' })
       const count = events.filter((e) => e.dayKey === key).length
-      const label = key.slice(5) // "MM/DD"
+      const label = key.slice(5) // "MM/DD"（既存のまま）
 
       days.push({ key, label, count })
     }
@@ -250,7 +292,6 @@ export default function App() {
     <div className={`app ${isDanger ? 'dangerMode' : ''}`}>
       <h1>ふろキャン♡</h1>
 
-      {/* ✅ ヘッダー直下：段階バッジ */}
       {isGodClean && (
         <div className={`godBadge godBadge--${cleanTier.key}`}>
           {cleanTier.badge} {cleanTier.label}モード {cleanTier.badge}
@@ -281,19 +322,16 @@ export default function App() {
 
       <div className="taunt">{taunt()}</div>
 
-      {/* ✅ stats圧縮：誇りだけ（情報を減らす） */}
       <div className="stats">
         <span>清潔連続: {cleanStreak}日</span>
         <span>・</span>
         <span>最長清潔: {bestClean}日</span>
       </div>
 
-      {/* 🫧 履歴グラフ */}
       <div className="history">
         <div className="historyHeader">
           <p className="historyTitle">🫧 リセット履歴</p>
 
-          {/* ✅ 押せない：ごほうび解放の表示 */}
           <div className="historyHint" aria-label="履歴レンジ">
             <span
               className={[
@@ -331,7 +369,6 @@ export default function App() {
         </div>
       </div>
 
-      {/* ✅ 段階到達トースト */}
       {showGodToast && (
         <div className="godToast" aria-live="polite">
           <div className="godToastInner">{toastText()}</div>
