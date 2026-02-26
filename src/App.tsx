@@ -5,6 +5,8 @@ import { loadBathEvents, appendBathEvent } from './lib/bathHistory'
 
 const nowMs = () => Date.now()
 
+const [bathFx, setBathFx] = useState(false)
+
 // ✅ JSTの「日付キー」(例: 2026/2/27) ※既存互換のため維持
 const getTodayKeyJST = () =>
   new Date().toLocaleDateString('ja-JP', { timeZone: 'Asia/Tokyo' })
@@ -241,6 +243,8 @@ export default function App() {
   }
 
   const onBathReset = () => {
+    setBathFx(true)
+    setTimeout(() => setBathFx(false), 400)
     const before = point
     const t = nowMs()
     const todayKey = getTodayKeyJST()
@@ -363,7 +367,7 @@ export default function App() {
 
         {/* 準主役：🛁ボタン（目立たせる） */}
         <div className="cta">
-          <button className="bathCta" onClick={onBathReset} aria-label="おふろ入った">
+          <button className={`bathCta ${bathFx ? 'bathFx' : ''}`} onClick={onBathReset} aria-label="おふろ入った">
             <span className="bathEmoji" aria-hidden="true">
               🛁
             </span>
