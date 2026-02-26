@@ -629,3 +629,58 @@ body {
     transition: none;
   }
 }
+
+/* ---------- PWA Toast (non-interactive) ---------- */
+
+.pwaToast {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(12px + env(safe-area-inset-bottom));
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 9998;
+}
+
+.pwaToastInner {
+  padding: 10px 14px;
+  border-radius: 999px;
+  font-weight: 900;
+  font-size: 12px;
+
+  background: rgba(255, 255, 255, 0.76);
+  border: 1px solid rgba(255, 105, 180, 0.18);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+
+  color: rgba(43, 34, 48, 0.92);
+  box-shadow: 0 10px 24px rgba(255, 105, 180, 0.14);
+
+  animation: pwaToastPop 1.8s ease both;
+}
+
+@keyframes pwaToastPop {
+  0% {
+    transform: translateY(8px) scale(0.98);
+    opacity: 0;
+  }
+  12% {
+    transform: translateY(0) scale(1.01);
+    opacity: 1;
+  }
+  78% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-6px) scale(0.99);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pwaToastInner {
+    animation: none;
+  }
+}

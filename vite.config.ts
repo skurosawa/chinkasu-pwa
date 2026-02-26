@@ -19,27 +19,24 @@ export default defineConfig({
       registerType: 'autoUpdate',
       injectRegister: 'auto',
 
-      // NOTE: apple-touch-icon.png を public/ に置いてないなら 404 になるので外してOK
+      // public/ 配下の静的アセット
+      // ✅ apple-touch-icon は「public/icons/apple-touch-icon.png」ならこのパス
       includeAssets: [
         'icons/icon-192.png',
         'icons/icon-512.png',
-        'apple-touch-icon.png',
+        'icons/apple-touch-icon.png',
       ],
 
       manifest: {
-        // ✅ アプリ名変更（ホーム画面/インストール名に反映）
         name: 'ふろキャン♡',
         short_name: 'ふろキャン',
+        description: 'ふろキャン♡｜ゆめかわ清潔で時間と戦う、ちょっと煽り系ジョークPWA🫧',
 
-        // ✅ 世界観も寄せる
-        description: 'ふろキャン♡｜ゆめかわ清潔で毎日きろくするジョークPWA🫧',
-
-        // ピンク基調はそのまま
         theme_color: '#FF69B4',
         background_color: '#FFF1FA',
 
         display: 'standalone',
-        orientation: 'portrait', // 画面回転禁止
+        orientation: 'portrait',
 
         // GitHub Pages 配下で正しく起動するための設定
         start_url: `/${repoName}/`,
@@ -48,7 +45,6 @@ export default defineConfig({
         icons: [
           { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' },
           { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png' },
-          // ✅ maskable は purpose を "maskable" 単独に（解釈が安定）
           {
             src: 'icons/icon-512.png',
             sizes: '512x512',
@@ -59,14 +55,65 @@ export default defineConfig({
       },
 
       workbox: {
-        // GitHub Pages 配下でのSPA/PWAナビゲーション安定化
+        // SPA/PWAナビゲーション安定化（GitHub Pages配下）
         navigateFallback: `/${repoName}/index.html`,
         globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,woff2}'],
+
+        // 変なURLが navigateFallback されるのを避ける（画像/アセット系）
+        navigateFallbackDenylist: [
+          // /assets/ や /icons/ をHTMLとして返さない
+          new RegExp(`^/${repoName}/(assets|icons)/`),
+          // 末尾が拡張子のリクエストはHTMLにしない
+          new RegExp(`^/${repoName}/.*\\.(?:js|css|png|jpg|jpeg|svg|webp|woff2|ico)$`),
+        ],
 
         // PWA安定化オプション
         clientsClaim: true,
         skipWaiting: true,
         cleanupOutdatedCaches: true,
+
+        // ✅ runtimeCaching を明示（iOSでの体感安定度UP）
+        runtimeCaching: [
+          // HTML（ナビゲーション）は NetworkFirst：更新が反映されやすい
+          {
+            urlPattern: ({ request }) => request.mode === 'navigate',
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'pages',
+              networkTimeoutSeconds: 3, // 体感待ちすぎ防止（回線弱い時にキャッシュへ）
+              expiration: {
+                maxEntries: 10,
+                maxAgeSeconds: 60 * 60 * 24 * 7, // 7日
+              },
+            },
+          },
+
+          // 画像は CacheFirst：オフライン/起動が強くなる
+          {
+            urlPattern: ({ request }) => request.destination === 'image',
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'images',
+              expiration: {
+                maxEntries: 60,
+                maxAgeSeconds: 60 * 60 * 24 * 30, // 30日
+              },
+            },
+          },
+
+          // フォントは CacheFirst：ちらつき・再DLを防ぐ
+          {
+            urlPattern: ({ request }) => request.destination === 'font',
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'fonts',
+              expiration: {
+                maxEntries: 20,
+                maxAgeSeconds: 60 * 60 * 24 * 365, // 1年
+              },
+            },
+          },
+        ],
       },
     }),
   ],

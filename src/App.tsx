@@ -36,7 +36,9 @@ const getOrInitLastResetAt = () => {
 }
 
 // ✅ "YYYY/M/D" or "YYYY/MM/DD" or "YYYY-MM-DD" を安全にパース
-const parseDayKey = (key: string): { y: number; m: number; d: number } | null => {
+const parseDayKey = (
+  key: string,
+): { y: number; m: number; d: number } | null => {
   if (!key) return null
   const parts = key.split(/[^\d]+/).filter(Boolean).map(Number)
   if (parts.length < 3) return null
@@ -85,6 +87,10 @@ export default function App() {
   const [countPulse, setCountPulse] = useState(false)
   const prevPointRef = useRef<number>(0)
 
+  // ✅ PWA更新トースト（非インタラクティブ）
+  const [showPwaToast, setShowPwaToast] = useState(false)
+  const [pwaToastText, setPwaToastText] = useState('')
+
   // ✅ 神清潔段階（7 / 14 / 30）
   const cleanTier = useMemo(() => {
     const s = cleanStreak
@@ -99,6 +105,26 @@ export default function App() {
   // ✅ ごほうび解放：神清潔（7日以上）で30日履歴を自動解放
   const historyRange: 7 | 30 = isGodClean ? 30 : 7
   const historyRangeLabel = historyRange === 30 ? 'ごほうび30日' : '7日'
+
+  // ✅ PWA更新イベント受信（main.tsx から飛んでくる）
+  useEffect(() => {
+    const show = (text: string) => {
+      setPwaToastText(text)
+      setShowPwaToast(true)
+      window.setTimeout(() => setShowPwaToast(false), 1800)
+    }
+
+    const onUpdate = () => show('🫧 更新が入ったよ。次回起動で反映')
+    const onOffline = () => show('✨ オフラインでも使えるようになった')
+
+    window.addEventListener('pwa:update-available', onUpdate as EventListener)
+    window.addEventListener('pwa:offline-ready', onOffline as EventListener)
+
+    return () => {
+      window.removeEventListener('pwa:update-available', onUpdate as EventListener)
+      window.removeEventListener('pwa:offline-ready', onOffline as EventListener)
+    }
+  }, [])
 
   // 起動時に履歴の最新を読む
   useEffect(() => {
@@ -230,7 +256,7 @@ export default function App() {
     // ✅ 同じ日は加算しない（多押し対策）
     if (lastBathDay === todayKey) return
 
-    // ✅ ここが変更点：日付差で「連続 or リセット」を決める
+    // ✅ 日付差で「連続 or リセット」を決める
     const diff = lastBathDay ? diffDaysByDayKey(todayKey, lastBathDay) : null
 
     let next = 1
@@ -264,7 +290,7 @@ export default function App() {
 
       const key = d.toLocaleDateString('ja-JP', { timeZone: 'Asia/Tokyo' })
       const count = events.filter((e) => e.dayKey === key).length
-      const label = key.slice(5) // "MM/DD"（既存のまま）
+      const label = key.slice(5) // "MM/DD"
 
       days.push({ key, label, count })
     }
@@ -369,9 +395,17 @@ export default function App() {
         </div>
       </div>
 
+      {/* ✅ 段階到達トースト */}
       {showGodToast && (
         <div className="godToast" aria-live="polite">
           <div className="godToastInner">{toastText()}</div>
+        </div>
+      )}
+
+      {/* ✅ PWA更新/オフライン準備トースト（非インタラクティブ） */}
+      {showPwaToast && (
+        <div className="pwaToast" aria-live="polite">
+          <div className="pwaToastInner">{pwaToastText}</div>
         </div>
       )}
     </div>
