@@ -57,6 +57,36 @@ body {
     calc(28px + env(safe-area-inset-bottom));
   text-align: center;
   color: var(--text);
+
+  position: relative;
+}
+
+/* ✅ 危険域の空気（うっすら曇る） */
+.app::before {
+  content: "";
+  position: absolute;
+  inset: -8px;
+  pointer-events: none;
+  border-radius: 24px;
+
+  opacity: 0;
+  transition: opacity 0.25s ease;
+
+  background: radial-gradient(
+      900px 420px at 50% -120px,
+      rgba(167, 78, 156, 0.22),
+      transparent 62%
+    ),
+    radial-gradient(
+      700px 520px at 50% 110%,
+      rgba(55, 30, 65, 0.10),
+      transparent 60%
+    );
+  filter: blur(0px);
+}
+
+.app.dangerMode::before {
+  opacity: 1;
 }
 
 .app h1 {
@@ -91,12 +121,24 @@ body {
   box-shadow: var(--shadow);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+
+  position: relative;
+  z-index: 1; /* danger overlayより上 */
 }
 
 .card p {
-  margin: 0 0 8px;
+  margin: 0;
   color: var(--sub);
-  font-weight: 800;
+  font-weight: 900;
+}
+
+/* ✅ 説明文を薄く短く */
+.cardSub {
+  margin-top: 6px;
+  font-size: 12px;
+  font-weight: 900;
+  color: rgba(107, 91, 110, 0.72);
+  letter-spacing: 0.02em;
 }
 
 /* ---------- Counter ---------- */
@@ -105,8 +147,29 @@ body {
   font-size: 64px;
   font-weight: 900;
   line-height: 1;
-  margin: 10px 0 14px;
+  margin: 12px 0 14px;
   letter-spacing: 0.02em;
+  transform: translateZ(0);
+}
+
+/* ✅ ポイント増加の瞬間だけ「ふわっ」 */
+.count.pulse {
+  animation: countPulse 0.26s ease both;
+}
+
+@keyframes countPulse {
+  0% {
+    transform: translateY(0) scale(1);
+    filter: brightness(1);
+  }
+  55% {
+    transform: translateY(-2px) scale(1.04);
+    filter: brightness(1.03);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    filter: brightness(1);
+  }
 }
 
 /* ---------- Gauge ---------- */
@@ -185,6 +248,9 @@ body {
   touch-action: manipulation;
 
   cursor: pointer;
+
+  position: relative;
+  z-index: 1;
 }
 
 .puni-btn:active {
@@ -209,9 +275,12 @@ body {
 
   color: var(--text);
   font-weight: 900;
+
+  position: relative;
+  z-index: 1;
 }
 
-/* ---------- Stats ---------- */
+/* ---------- Stats（圧縮） ---------- */
 
 .stats {
   margin-top: 12px;
@@ -228,6 +297,9 @@ body {
   flex-wrap: wrap;
   justify-content: center;
   gap: 6px;
+
+  position: relative;
+  z-index: 1;
 }
 
 /* ---------- God Toast ---------- */
@@ -294,6 +366,8 @@ body {
   overflow: hidden;
 
   color: var(--pink);
+
+  z-index: 1;
 }
 
 .godBadge::after {
@@ -352,6 +426,9 @@ body {
   border-radius: 16px;
   background: rgba(255, 255, 255, 0.66);
   border: 1px solid rgba(255, 105, 180, 0.16);
+
+  position: relative;
+  z-index: 1;
 }
 
 .history * {
@@ -544,5 +621,11 @@ body {
   }
   .historyPill.unlockFx::after {
     animation: none;
+  }
+  .count.pulse {
+    animation: none;
+  }
+  .app::before {
+    transition: none;
   }
 }

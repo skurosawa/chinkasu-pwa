@@ -58,6 +58,10 @@ export default function App() {
   const [showHistoryUnlockFx, setShowHistoryUnlockFx] = useState(false)
   const prevIsGodCleanRef = useRef<boolean>(false)
 
+  // ✅ カウント演出（ポイント増加時だけふわっと）
+  const [countPulse, setCountPulse] = useState(false)
+  const prevPointRef = useRef<number>(0)
+
   // ✅ 神清潔段階（7 / 14 / 30）
   const cleanTier = useMemo(() => {
     const s = cleanStreak
@@ -139,6 +143,19 @@ export default function App() {
       window.removeEventListener('pageshow', onPageShow)
     }
   }, [lastResetAt])
+
+  // ✅ ポイントが増えた瞬間だけ、数字をふわっと（押せない演出）
+  useEffect(() => {
+    const prev = prevPointRef.current
+
+    // 増加のみ（0→増加含む）。リセット時(大きく減る)は演出しない
+    if (point > prev && point > 0) {
+      setCountPulse(true)
+      window.setTimeout(() => setCountPulse(false), 260)
+    }
+
+    prevPointRef.current = point
+  }, [point])
 
   const dangerPercent = Math.round((point / MAX_POINT) * 100)
   const isDanger = point >= 24
@@ -230,7 +247,7 @@ export default function App() {
   }
 
   return (
-    <div className="app">
+    <div className={`app ${isDanger ? 'dangerMode' : ''}`}>
       <h1>ふろキャン♡</h1>
 
       {/* ✅ ヘッダー直下：段階バッジ */}
@@ -242,9 +259,10 @@ export default function App() {
       )}
 
       <div className="card">
-        <p>現在ポイント（1時間で+1）</p>
+        <p>現在ポイント</p>
+        <div className="cardSub">時間でふえる</div>
 
-        <div className="count">{point}</div>
+        <div className={`count ${countPulse ? 'pulse' : ''}`}>{point}</div>
 
         <div className="gauge">
           <div className={gaugeFillClass} style={{ width: `${dangerPercent}%` }} />
@@ -263,14 +281,11 @@ export default function App() {
 
       <div className="taunt">{taunt()}</div>
 
+      {/* ✅ stats圧縮：誇りだけ（情報を減らす） */}
       <div className="stats">
         <span>清潔連続: {cleanStreak}日</span>
         <span>・</span>
         <span>最長清潔: {bestClean}日</span>
-        <span>・</span>
-        <span>上限: {MAX_POINT}</span>
-        <span>・</span>
-        <span>直近🛁: {lastBathPoint === null ? '-' : `${lastBathPoint}→0`}</span>
       </div>
 
       {/* 🫧 履歴グラフ */}
