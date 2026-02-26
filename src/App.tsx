@@ -5,8 +5,6 @@ import { loadBathEvents, appendBathEvent } from './lib/bathHistory'
 
 const nowMs = () => Date.now()
 
-const [bathFx, setBathFx] = useState(false)
-
 // ✅ JSTの「日付キー」(例: 2026/2/27) ※既存互換のため維持
 const getTodayKeyJST = () =>
   new Date().toLocaleDateString('ja-JP', { timeZone: 'Asia/Tokyo' })
@@ -70,12 +68,14 @@ export default function App() {
   const [cleanStreak, setCleanStreak] = useState<number>(() =>
     Number(safeGet('currentCleanStreak') ?? '0'),
   )
-
   const [bestClean, setBestClean] = useState<number>(() =>
     Number(safeGet('bestCleanStreak') ?? '0'),
   )
 
   const [lastBathPoint, setLastBathPoint] = useState<number | null>(null)
+
+  // ✅ 🛁ボタン押下エフェクト
+  const [bathFx, setBathFx] = useState(false)
 
   // ✅ 神清潔トースト（到達した瞬間だけ）
   const [showGodToast, setShowGodToast] = useState(false)
@@ -181,7 +181,6 @@ export default function App() {
   useEffect(() => {
     const tick = () => {
       const p = calcPoint(nowMs(), lastResetAt, MAX_POINT)
-      // ✅ 整数に固定（端数でUIがズレないように）
       const v = Math.max(0, Math.floor(p))
       setPoint(v)
     }
@@ -243,8 +242,10 @@ export default function App() {
   }
 
   const onBathReset = () => {
+    // ✅ 押下演出（軽量）
     setBathFx(true)
-    setTimeout(() => setBathFx(false), 400)
+    window.setTimeout(() => setBathFx(false), 400)
+
     const before = point
     const t = nowMs()
     const todayKey = getTodayKeyJST()
@@ -264,10 +265,7 @@ export default function App() {
     // ✅ 日付差で「連続 or リセット」を決める
     const diff = lastBathDay ? diffDaysByDayKey(todayKey, lastBathDay) : null
 
-    let next = 1
-    if (diff === 1) next = cleanStreak + 1
-    else next = 1
-
+    const next = diff === 1 ? cleanStreak + 1 : 1
     const nextBest = Math.max(bestClean, next)
 
     setCleanStreak(next)
@@ -297,7 +295,7 @@ export default function App() {
     const max = Math.max(1, ...days.map((d) => d.count))
     const maxHeight = 72
 
-    // ✅ 0回の日は“薄いドット”扱い（高さ0にしてレンダリング分岐）
+    // ✅ 0回の日は“薄いドット”（高さ0）にして描画分岐
     const items = days.map((d) => {
       if (d.count === 0) return { ...d, height: 0 }
       const height = Math.max(10, Math.round((d.count / max) * maxHeight))
@@ -314,7 +312,6 @@ export default function App() {
     return '✨ いい感じ！'
   }
 
-  // UI用（短文化したラベル）
   const dangerLabel = isGodClean ? `${cleanTier.label}浄化` : '危険'
   const statusLabel = badge()
 
@@ -339,7 +336,6 @@ export default function App() {
       </header>
 
       <main className="stage">
-        {/* 主役：point */}
         <section className="hero" aria-label="現在のポイント">
           <div className="heroNumber">
             <span className={`heroValue ${countPulse ? 'pulse' : ''}`}>{point}</span>
@@ -351,23 +347,26 @@ export default function App() {
               {dangerLabel}: {dangerPercent}%
             </span>
             <span className="tag tag--status">{statusLabel}</span>
-            {isGodClean && (
-              <span className="tag tag--status">連続 {cleanStreak}</span>
-            )}
+            {isGodClean && <span className="tag tag--status">連続 {cleanStreak}</span>}
           </div>
 
-            {/* ✅ 0%でもレールは見せる（塗りは0） */}
-            <div className="gaugeWrap">
-              <div className={`gauge ${dangerPercent === 0 ? 'isZero' : ''}`}>
-                <div className={gaugeFillClass} style={{ width: `${dangerPercent}%` }} />
-              </div>
+          {/* ✅ 0%でもレールは見せる（塗りは0） */}
+          <div className="gaugeWrap">
+            <div className={`gauge ${dangerPercent === 0 ? 'isZero' : ''}`}>
+              <div
+                className={gaugeFillClass}
+                style={{ width: `${dangerPercent}%` }}
+              />
             </div>
-
+          </div>
         </section>
 
-        {/* 準主役：🛁ボタン（目立たせる） */}
         <div className="cta">
-          <button className={`bathCta ${bathFx ? 'bathFx' : ''}`} onClick={onBathReset} aria-label="おふろ入った">
+          <button
+            className={`bathCta ${bathFx ? 'bathFx' : ''}`}
+            onClick={onBathReset}
+            aria-label="おふろ入った"
+          >
             <span className="bathEmoji" aria-hidden="true">
               🛁
             </span>
@@ -375,7 +374,6 @@ export default function App() {
           </button>
         </div>
 
-        {/* 補助：taunt / stats */}
         <section className="notes" aria-label="メッセージと統計">
           <p className="tauntLine">{taunt()}</p>
 
@@ -391,7 +389,6 @@ export default function App() {
           </dl>
         </section>
 
-        {/* 履歴：別セクション */}
         <section className="historyPanel" aria-label="履歴">
           <div className="panelHeader">
             <h2 className="panelTitle">履歴</h2>
@@ -426,11 +423,7 @@ export default function App() {
                       title={`${d.label}：${d.count}回`}
                     />
                   ) : (
-                    <div
-                      className="historyDot"
-                      title={`${d.label}：${d.count}回`}
-                      aria-hidden="true"
-                    />
+                    <div className="historyDot" title={`${d.label}：0回`} aria-hidden="true" />
                   )}
                   <span className="historyDay">{d.label}</span>
                 </div>
@@ -443,14 +436,12 @@ export default function App() {
           </div>
         </section>
 
-        {/* ✅ 段階到達トースト */}
         {showGodToast && (
           <div className="godToast" aria-live="polite">
             <div className="godToastInner">{toastText()}</div>
           </div>
         )}
 
-        {/* ✅ PWA更新/オフライン準備トースト（非インタラクティブ） */}
         {showPwaToast && (
           <div className="pwaToast" aria-live="polite">
             <div className="pwaToastInner">{pwaToastText}</div>
