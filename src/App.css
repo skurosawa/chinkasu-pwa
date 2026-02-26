@@ -3,7 +3,7 @@
   --bg1: #fff1fa;
 
   --card: rgba(255, 255, 255, 0.78);
-  --line: rgba(255, 105, 180, 0.18);
+  --line: rgba(255, 105, 180, 0.16);
 
   --text: #2b2230;
   --sub: #6b5b6e;
@@ -12,8 +12,9 @@
   --pink2: #ffa6d4;
   --pink3: #ffd1e8;
 
-  --shadow: 0 10px 30px rgba(255, 105, 180, 0.14);
-  --shadow2: 0 6px 16px rgba(17, 24, 39, 0.08);
+  /* 影を少し繊細に */
+  --shadow: 0 10px 26px rgba(255, 105, 180, 0.12);
+  --shadow2: 0 6px 14px rgba(17, 24, 39, 0.07);
 
   --r-xl: 26px;
   --r-lg: 18px;
@@ -24,8 +25,6 @@
 * {
   box-sizing: border-box;
 }
-
-/* ---------- Layout ---------- */
 
 .app {
   max-width: 520px;
@@ -39,7 +38,7 @@
   margin: 12px 0 8px;
   font-size: 28px;
   font-weight: 900;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
 }
 
 /* ---------- Card ---------- */
@@ -76,8 +75,8 @@
 .gauge {
   height: 16px;
   border-radius: 999px;
-  background: rgba(255, 105, 180, 0.1);
-  border: 1px solid rgba(255, 105, 180, 0.12);
+  background: rgba(255, 105, 180, 0.09);
+  border: 1px solid rgba(255, 105, 180, 0.11);
   overflow: hidden;
 }
 
@@ -98,26 +97,30 @@
   color: #d7266a;
 }
 
-/* ---------- Status Badge ---------- */
+/* ---------- Status Badge (label look) ---------- */
 
-.badge{
+.badge {
   margin-top: 12px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
 
-  /* “ボタン感”を消す */
   padding: 8px 12px;
-  border-radius: 14px;                 /* pillをやめる */
-  border: 1px solid rgba(255,105,180,.12);
-  background: rgba(255,255,255,.55);   /* 透明寄り */
-  box-shadow: none;                    /* 影を消す */
+  border-radius: 14px;
+  border: 1px solid rgba(255, 105, 180, 0.12);
+
+  /* “チップ”ではなく“ラベル/ステッカー”に寄せる */
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.66),
+    rgba(255, 255, 255, 0.44)
+  );
+  box-shadow: none;
 
   font-weight: 900;
   color: var(--text);
 
-  /* 押せそうな挙動を消す */
   cursor: default;
   -webkit-tap-highlight-color: transparent;
   user-select: none;
@@ -147,32 +150,41 @@
   filter: brightness(0.98);
 }
 
-/* ---------- Taunt ---------- */
+/* ---------- Taunt (text-like; not button) ---------- */
 
 .taunt {
   margin: 14px 0 0;
-  padding: 12px 14px;
-  border-radius: var(--r-lg);
-  background: rgba(255, 255, 255, 0.64);
-  border: 1px solid rgba(255, 105, 180, 0.14);
+  padding: 10px 6px;
+
+  /* ボタンっぽさを消す */
+  border-radius: 0;
+  background: transparent;
+  border: 0;
+
   color: var(--text);
   font-weight: 900;
 }
 
-/* ---------- Stats ---------- */
+/* ---------- Stats (lighter, less “clickable”) ---------- */
 
 .stats {
   margin-top: 12px;
   padding: 10px 12px;
-  border-radius: var(--r-lg);
-  background: rgba(255, 255, 255, 0.58);
-  border: 1px dashed rgba(255, 105, 180, 0.26);
+  border-radius: 16px;
+
+  background: rgba(255, 255, 255, 0.46);
+  border: 1px dashed rgba(255, 105, 180, 0.18);
+
   color: var(--sub);
   font-weight: 900;
+
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   gap: 6px;
+
+  cursor: default;
+  user-select: none;
 }
 
 /* ---------- God Toast ---------- */
@@ -228,14 +240,13 @@
   margin: 10px 0 6px;
   padding: 10px 14px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 105, 180, 0.22);
-  background: rgba(255, 255, 255, 0.66);
+  border: 1px solid rgba(255, 105, 180, 0.2);
+  background: rgba(255, 255, 255, 0.62);
   box-shadow: var(--shadow2);
   font-weight: 900;
   position: relative;
   overflow: hidden;
 
-  /* フォールバック（背景クリップが効かなくても読める） */
   color: var(--pink);
 }
 
@@ -246,12 +257,13 @@
   background: linear-gradient(
     110deg,
     transparent 30%,
-    rgba(255, 255, 255, 0.35) 50%,
+    rgba(255, 255, 255, 0.32) 50%,
     transparent 70%
   );
   transform: translateX(-60%);
   animation: godShimmer 2.2s linear infinite;
   pointer-events: none;
+  mix-blend-mode: screen;
 }
 
 @keyframes godShimmer {
@@ -272,10 +284,10 @@
   color: var(--pink);
 }
 .godBadge--super {
-  color: #c026d3; /* 少し紫寄り */
+  color: #c026d3;
 }
 .godBadge--legend {
-  color: #b45309; /* ゴールド寄り */
+  color: #b45309;
 }
 
 /* ---------- God Gauge (pink glow) ---------- */
@@ -291,9 +303,9 @@
 .history {
   margin-top: 18px;
   padding: 14px;
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.7);
-  border: 1px solid rgba(255, 105, 180, 0.18);
+  border-radius: 16px; /* 少し小さくして軽く */
+  background: rgba(255, 255, 255, 0.66);
+  border: 1px solid rgba(255, 105, 180, 0.16);
 }
 
 .historyHeader {
@@ -327,7 +339,7 @@
   border-radius: 0;
 
   font-weight: 900;
-  color: rgba(107, 91, 110, 0.78); /* var(--sub)薄め */
+  color: rgba(107, 91, 110, 0.78);
   letter-spacing: 0.02em;
 
   cursor: pointer;
