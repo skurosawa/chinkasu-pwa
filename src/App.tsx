@@ -34,30 +34,48 @@ export default function App() {
 
   const [lastBathPoint, setLastBathPoint] = useState<number | null>(null)
 
-  // 神清潔トースト
+  // ✅ 神清潔トースト（到達した瞬間だけ）
   const [showGodToast, setShowGodToast] = useState(false)
   const prevStreakRef = useRef<number>(cleanStreak)
 
-  const isGodClean = cleanStreak >= 7
+  // ✅ 履歴レンジ（7日 / 30日）
+  const [historyRange, setHistoryRange] = useState<7 | 30>(7)
 
-  // 起動時に履歴読み込み
+  // ✅ 神清潔段階（7 / 14 / 30）
+  const cleanTier = useMemo(() => {
+    const s = cleanStreak
+    if (s >= 30) return { key: 'legend', label: '伝説清潔', badge: '👑', min: 30 }
+    if (s >= 14) return { key: 'super', label: '超神清潔', badge: '💖', min: 14 }
+    if (s >= 7) return { key: 'god', label: '神清潔', badge: '✨', min: 7 }
+    return { key: 'none', label: '', badge: '', min: 0 }
+  }, [cleanStreak])
+
+  const isGodClean = cleanTier.key !== 'none'
+
+  // 起動時に履歴の最新を読む
   useEffect(() => {
     const events = loadBathEvents()
     const last = events.at(-1)
     setLastBathPoint(last ? last.pointBefore : null)
   }, [])
 
-  // 7日到達時トースト
+  // ✅ 7日到達した瞬間だけ祝う（段階が変わった瞬間に出す）
   useEffect(() => {
     const prev = prevStreakRef.current
-    if (prev < 7 && cleanStreak >= 7) {
+
+    const crossed7 = prev < 7 && cleanStreak >= 7
+    const crossed14 = prev < 14 && cleanStreak >= 14
+    const crossed30 = prev < 30 && cleanStreak >= 30
+
+    if (crossed7 || crossed14 || crossed30) {
       setShowGodToast(true)
       window.setTimeout(() => setShowGodToast(false), 1600)
     }
+
     prevStreakRef.current = cleanStreak
   }, [cleanStreak])
 
-  // 1分ごと再計算
+  // 1分ごとにポイント再計算
   useEffect(() => {
     const tick = () => {
       const p = calcPoint(nowMs(), lastResetAt, MAX_POINT)
@@ -71,6 +89,7 @@ export default function App() {
   const dangerPercent = Math.round((point / MAX_POINT) * 100)
   const isDanger = point >= 24
 
+  // ✅ 神清潔中はピンク浄化ゲージにする
   const gaugeFillClass = isGodClean
     ? 'gaugeFill godGaugePink'
     : 'gaugeFill'
@@ -116,13 +135,13 @@ export default function App() {
     }
   }
 
-  // 🫧 直近7日リセット回数
-  const weeklyCounts = useMemo(() => {
+  // 🫧 履歴（自動スケーリング + 7/30）
+  const historyData = useMemo(() => {
     const events = loadBathEvents()
-    const result: { day: string; count: number }[] = []
     const now = new Date()
 
-    for (let i = 6; i >= 0; i--) {
+    const days: { key: string; label: string; count: number }[] = []
+    for (let i = historyRange - 1; i >= 0; i--) {
       const d = new Date(now)
       d.setDate(now.getDate() - i)
 
@@ -131,22 +150,39 @@ export default function App() {
       })
 
       const count = events.filter((e) => e.dayKey === key).length
-      result.push({ day: key.slice(5), count })
+      const label = key.slice(5) // "MM/DD"
+
+      days.push({ key, label, count })
     }
 
-    return result
-  }, [cleanStreak, lastBathPoint])
+    const max = Math.max(1, ...days.map((d) => d.count))
+    const maxHeight = 72
+
+    const items = days.map((d) => {
+      const height =
+        d.count === 0 ? 0 : Math.max(8, Math.round((d.count / max) * maxHeight))
+      return { ...d, height }
+    })
+
+    return { max, items }
+  }, [historyRange, cleanStreak, lastBathPoint])
+
+  const toastText = () => {
+    if (cleanTier.key === 'legend') return '👑 伝説清潔になった！'
+    if (cleanTier.key === 'super') return '💖 超神清潔になった！'
+    if (cleanTier.key === 'god') return '✨ 神清潔達成！'
+    return '✨ いい感じ！'
+  }
 
   return (
     <div className="app">
       <h1>ふろキャン♡ 🫧</h1>
 
+      {/* ✅ ヘッダー直下：段階バッジ */}
       {isGodClean && (
-        <div className="godBadge">
-          ✨ 神清潔モード ✨
-          <span className="godBadgeSub">
-            清潔連続 {cleanStreak} 日
-          </span>
+        <div className={`godBadge godBadge--${cleanTier.key}`}>
+          {cleanTier.badge} {cleanTier.label}モード {cleanTier.badge}
+          <span className="godBadgeSub">清潔連続 {cleanStreak} 日</span>
         </div>
       )}
 
@@ -163,7 +199,7 @@ export default function App() {
         </div>
 
         <div className={`gaugeLabel ${isDanger ? 'danger' : ''}`}>
-          {isGodClean ? '神浄化度' : '危険度'}: {dangerPercent}%
+          {isGodClean ? `${cleanTier.label}浄化度` : '危険度'}: {dangerPercent}%
         </div>
 
         <div className="badge">{badge()}</div>
@@ -189,26 +225,49 @@ export default function App() {
 
       {/* 🫧 履歴グラフ */}
       <div className="history">
-        <p className="historyTitle">🫧 直近7日リセット</p>
+        <div className="historyHeader">
+          <p className="historyTitle">🫧 リセット履歴</p>
 
-        <div className="historyBars">
-          {weeklyCounts.map((d) => (
-            <div key={d.day} className="historyItem">
+          <div className="historyTabs" role="tablist" aria-label="履歴レンジ">
+            <button
+              type="button"
+              className={`historyTab ${historyRange === 7 ? 'active' : ''}`}
+              onClick={() => setHistoryRange(7)}
+            >
+              7日
+            </button>
+            <button
+              type="button"
+              className={`historyTab ${historyRange === 30 ? 'active' : ''}`}
+              onClick={() => setHistoryRange(30)}
+            >
+              30日
+            </button>
+          </div>
+        </div>
+
+        <div className={`historyBars ${historyRange === 30 ? 'monthly' : ''}`}>
+          {historyData.items.map((d) => (
+            <div key={d.key} className="historyItem">
               <div
                 className="historyBar"
-                style={{ height: `${d.count * 16}px` }}
+                style={{ height: `${d.height}px` }}
+                title={`${d.label}：${d.count}回`}
               />
-              <span className="historyDay">{d.day}</span>
+              <span className="historyDay">{d.label}</span>
             </div>
           ))}
         </div>
+
+        <div className="historyMeta">
+          <span>最大: {historyData.max}回</span>
+        </div>
       </div>
 
+      {/* ✅ 段階到達トースト */}
       {showGodToast && (
         <div className="godToast" aria-live="polite">
-          <div className="godToastInner">
-            ✨ 神清潔達成！ ✨
-          </div>
+          <div className="godToastInner">{toastText()}</div>
         </div>
       )}
     </div>

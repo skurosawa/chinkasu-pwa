@@ -287,3 +287,88 @@
   color: var(--sub);
   font-weight: 700;
 }
+
+/* ---- 履歴：ヘッダ + 切替 ---- */
+.historyHeader{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:10px;
+}
+
+.historyTitle{
+  margin:0;
+  font-weight:900;
+  color: var(--sub);
+}
+
+.historyTabs{
+  display:flex;
+  gap:8px;
+}
+
+.historyTab{
+  border:1px solid rgba(255,105,180,.22);
+  background: rgba(255,255,255,.7);
+  color: var(--sub);
+  font-weight:900;
+  padding:8px 10px;
+  border-radius:999px;
+  cursor:pointer;
+}
+
+.historyTab.active{
+  background: linear-gradient(90deg, var(--pink), #ff79b8);
+  color:#fff;
+  border-color: transparent;
+}
+
+.historyBars{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  height: 90px;
+  gap:8px;
+}
+
+/* 30日は横スクロールで詰まり回避 */
+.historyBars.monthly{
+  overflow-x:auto;
+  justify-content:flex-start;
+  padding-bottom:6px;
+  scroll-snap-type:x proximity;
+}
+
+.historyBars.monthly .historyItem{
+  min-width: 26px;
+  scroll-snap-align:end;
+}
+
+.historyItem{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:6px;
+  flex:1;
+}
+
+.historyBar{
+  width:100%;
+  max-width:28px;
+  background: linear-gradient(180deg,#ff7dbb,#ffb2da);
+  border-radius: 8px 8px 4px 4px;
+  transition: height .2s ease;
+}
+
+.historyMeta{
+  margin-top:8px;
+  font-size:12px;
+  color: var(--sub);
+  font-weight:800;
+}
+
+/* ---- 神清潔段階（バッジ色味を少し変える） */
+.godBadge--god{ color: var(--pink); }
+.godBadge--super{ color: #c026d3; }   /* 少し紫寄り */
+.godBadge--legend{ color: #b45309; }  /* ゴールド寄り */
