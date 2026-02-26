@@ -933,3 +933,36 @@ body {
     background: rgba(255, 255, 255, 0.14);
   }
 }
+
+/* 共有ボタン（アイコンのみ・ピンク） */
+.shareBtn {
+  appearance: none;
+  -webkit-appearance: none;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 34px;
+  height: 34px;
+
+  border-radius: 999px;
+  border: 1px solid rgba(255, 105, 180, 0.18);
+  background: rgba(255, 255, 255, 0.55);
+
+  cursor: pointer;
+  pointer-events: auto;
+
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.shareBtn:active {
+  transform: translateY(0.5px) scale(0.97);
+}
+
+.shareIcon {
+  width: 18px;
+  height: 18px;
+  color: var(--pink);
+}
