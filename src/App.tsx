@@ -179,7 +179,7 @@ export default function App() {
   useEffect(() => {
     const tick = () => {
       const p = calcPoint(nowMs(), lastResetAt, MAX_POINT)
-      // ✅ 整数に固定（0.2 みたいな端数がUIに残るのを防ぐ）
+      // ✅ 整数に固定（端数でUIがズレないように）
       const v = Math.max(0, Math.floor(p))
       setPoint(v)
     }
@@ -293,9 +293,10 @@ export default function App() {
     const max = Math.max(1, ...days.map((d) => d.count))
     const maxHeight = 72
 
+    // ✅ 0回の日は“薄いドット”扱い（高さ0にしてレンダリング分岐）
     const items = days.map((d) => {
-      const height =
-        d.count === 0 ? 6 : Math.max(10, Math.round((d.count / max) * maxHeight))
+      if (d.count === 0) return { ...d, height: 0 }
+      const height = Math.max(10, Math.round((d.count / max) * maxHeight))
       return { ...d, height }
     })
 
@@ -374,7 +375,7 @@ export default function App() {
           </button>
         </div>
 
-        {/* 補助：taunt / stats（芯を揃える） */}
+        {/* 補助：taunt / stats */}
         <section className="notes" aria-label="メッセージと統計">
           <p className="tauntLine">{taunt()}</p>
 
@@ -418,11 +419,19 @@ export default function App() {
             <div className={`historyBars ${historyRange === 30 ? 'monthly' : ''}`}>
               {historyData.items.map((d) => (
                 <div key={d.key} className="historyItem">
-                  <div
-                    className="historyBar"
-                    style={{ height: `${d.height}px` }}
-                    title={`${d.label}：${d.count}回`}
-                  />
+                  {d.height > 0 ? (
+                    <div
+                      className="historyBar"
+                      style={{ height: `${d.height}px` }}
+                      title={`${d.label}：${d.count}回`}
+                    />
+                  ) : (
+                    <div
+                      className="historyDot"
+                      title={`${d.label}：${d.count}回`}
+                      aria-hidden="true"
+                    />
+                  )}
                   <span className="historyDay">{d.label}</span>
                 </div>
               ))}

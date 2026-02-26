@@ -632,6 +632,16 @@ body {
   opacity: 0.92;
 }
 
+/* ✅ 0回の日：薄いドット（“入ってない”の印） */
+.historyDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(255, 95, 162, 0.12);
+  border: 1px solid rgba(255, 95, 162, 0.10);
+  box-shadow: none;
+}
+
 .historyDay {
   font-size: 11px;
   color: var(--sub);
