@@ -123,7 +123,6 @@ body {
 .stage {
   display: flex;
   flex-direction: column;
-  /* ✅ ボタンを目立たせたいので、hero→cta間を少し詰めて導線を強化 */
   gap: 18px;
 }
 
@@ -133,11 +132,12 @@ body {
   padding-top: env(safe-area-inset-top);
 }
 
+/* ✅ タイトル/刻印を中央に揃えて“芯”を一本にする */
 .brand {
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--s-3);
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-2);
   margin: 0 0 var(--s-4);
 }
 
@@ -147,9 +147,9 @@ body {
   font-weight: 900;
   letter-spacing: 0.04em;
   color: rgba(107, 91, 110, 0.88);
+  text-align: center;
 }
 
-/* 神清潔：押せない刻印 */
 .badgeStamp {
   display: flex;
   align-items: center;
@@ -227,8 +227,6 @@ body {
   -webkit-backdrop-filter: blur(10px);
   position: relative;
   z-index: 1;
-
-  /* ✅ 重心を中央に戻す */
   text-align: center;
 }
 
@@ -236,7 +234,7 @@ body {
   display: flex;
   align-items: baseline;
   gap: var(--s-2);
-  justify-content: center; /* ← 左重心解消 */
+  justify-content: center;
 }
 
 .heroValue {
@@ -281,7 +279,7 @@ body {
   display: flex;
   gap: var(--s-2);
   flex-wrap: wrap;
-  justify-content: center; /* ← 芯を揃える */
+  justify-content: center;
 }
 
 .tag {
@@ -344,7 +342,6 @@ body {
   z-index: 2;
 }
 
-/* ✅ 目立たせる：幅を持たせ、影・立体・視認性を強める */
 .bathCta {
   display: inline-flex;
   align-items: center;
@@ -366,7 +363,6 @@ body {
   background: linear-gradient(90deg, var(--pink), #ff79b8);
   box-shadow: 0 20px 44px rgba(255, 95, 162, 0.30);
 
-  /* ほんのり縁取りで“ボタン”を強化 */
   outline: 1px solid rgba(255, 255, 255, 0.35);
   outline-offset: -1px;
 
@@ -380,7 +376,6 @@ body {
   position: relative;
 }
 
-/* ふわっと光の膜（押せる主役感） */
 .bathCta::before {
   content: "";
   position: absolute;
@@ -416,13 +411,13 @@ body {
   font-size: 16px;
 }
 
-/* ---------- Notes（芯を揃える） ---------- */
+/* ---------- Notes ---------- */
 
 .notes {
   position: relative;
   z-index: 1;
   padding: 0 6px;
-  text-align: center; /* ← 中央基準に統一して“芯”を作る */
+  text-align: center;
 }
 
 .tauntLine {
@@ -433,7 +428,6 @@ body {
   line-height: 1.55;
 }
 
-/* “脚注っぽい”統計（2項目固定） */
 .statsInline {
   margin: 0;
   padding: 10px 12px;
@@ -444,7 +438,7 @@ body {
 
   display: flex;
   gap: 14px;
-  justify-content: center; /* ← 中央寄せ */
+  justify-content: center;
   flex-wrap: wrap;
 
   color: rgba(107, 91, 110, 0.86);
@@ -489,7 +483,6 @@ body {
   color: rgba(107, 91, 110, 0.86);
 }
 
-/* ✅ 右側に“固める”ことで視線が散らない */
 .panelHint {
   display: flex;
   align-items: center;
@@ -530,7 +523,6 @@ body {
   box-shadow: 0 8px 18px rgba(255, 105, 180, 0.10);
 }
 
-/* ✅ 解放した瞬間だけ：キラッ + ぷにっ */
 .historyPill.unlockFx {
   animation: rewardPop 1.1s ease both;
 }
@@ -592,7 +584,6 @@ body {
   opacity: 0.98;
 }
 
-/* 履歴は “押せない” をより強く（万一リンクが混ざっても） */
 .historyPanel button,
 .historyPanel [role="button"],
 .historyPanel a {
@@ -611,7 +602,6 @@ body {
   gap: 8px;
 }
 
-/* 30日は横スクロール（詰まり回避） */
 .historyBars.monthly {
   overflow-x: auto;
   justify-content: flex-start;
@@ -639,8 +629,6 @@ body {
   background: linear-gradient(180deg, #ff7dbb, #ffb2da);
   border-radius: 8px 8px 4px 4px;
   transition: height 0.2s ease;
-
-  /* ✅ 0回の日でも存在感を“薄く” */
   opacity: 0.92;
 }
 

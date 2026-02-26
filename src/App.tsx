@@ -350,11 +350,17 @@ export default function App() {
             )}
           </div>
 
-          <div className="gaugeWrap">
-            <div className="gauge">
-              <div className={gaugeFillClass} style={{ width: `${dangerPercent}%` }} />
+          {/* ✅ 0ptのときはゲージを出さない（清潔＝何も溜まってない） */}
+          {point > 0 && (
+            <div className="gaugeWrap">
+              <div className="gauge">
+                <div
+                  className={gaugeFillClass}
+                  style={{ width: `${dangerPercent}%` }}
+                />
+              </div>
             </div>
-          </div>
+          )}
         </section>
 
         {/* 準主役：🛁ボタン（目立たせる） */}
