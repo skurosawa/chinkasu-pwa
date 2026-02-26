@@ -176,7 +176,7 @@ export default function App() {
 
   return (
     <div className="app">
-      <h1>ふろキャン♡ 🫧</h1>
+      <h1>ふろキャン♡</h1>
 
       {/* ✅ ヘッダー直下：段階バッジ */}
       {isGodClean && (
