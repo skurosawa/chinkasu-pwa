@@ -352,17 +352,13 @@ export default function App() {
             )}
           </div>
 
-          {/* ✅ “表示が0%なら出さない”でUIズレを完全に潰す */}
-          {dangerPercent > 0 && (
+            {/* ✅ 0%でもレールは見せる（塗りは0） */}
             <div className="gaugeWrap">
-              <div className="gauge">
-                <div
-                  className={gaugeFillClass}
-                  style={{ width: `${dangerPercent}%` }}
-                />
+              <div className={`gauge ${dangerPercent === 0 ? 'isZero' : ''}`}>
+                <div className={gaugeFillClass} style={{ width: `${dangerPercent}%` }} />
               </div>
             </div>
-          )}
+
         </section>
 
         {/* 準主役：🛁ボタン（目立たせる） */}

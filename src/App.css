@@ -333,6 +333,16 @@ body {
   transition: background 0.4s ease, box-shadow 0.4s ease;
 }
 
+/* ✅ 0%のときは“ただの薄いレール”にして主張を落とす */
+.gauge.isZero {
+  background: rgba(255, 105, 180, 0.06);
+  border-color: rgba(255, 105, 180, 0.08);
+}
+
+.gauge.isZero .gaugeFill {
+  box-shadow: none;
+}
+
 /* ---------- CTA (唯一の強ボタン) ---------- */
 
 .cta {
