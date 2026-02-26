@@ -179,7 +179,9 @@ export default function App() {
   useEffect(() => {
     const tick = () => {
       const p = calcPoint(nowMs(), lastResetAt, MAX_POINT)
-      setPoint(p)
+      // ✅ 整数に固定（0.2 みたいな端数がUIに残るのを防ぐ）
+      const v = Math.max(0, Math.floor(p))
+      setPoint(v)
     }
 
     tick()
@@ -292,7 +294,6 @@ export default function App() {
     const maxHeight = 72
 
     const items = days.map((d) => {
-      // ✅ 空白の日も“うっすら存在”させて、右端1本の悪目立ちを軽減
       const height =
         d.count === 0 ? 6 : Math.max(10, Math.round((d.count / max) * maxHeight))
       return { ...d, height }
@@ -350,8 +351,8 @@ export default function App() {
             )}
           </div>
 
-          {/* ✅ 0ptのときはゲージを出さない（清潔＝何も溜まってない） */}
-          {point > 0 && (
+          {/* ✅ “表示が0%なら出さない”でUIズレを完全に潰す */}
+          {dangerPercent > 0 && (
             <div className="gaugeWrap">
               <div className="gauge">
                 <div
