@@ -54,8 +54,9 @@ export default function App() {
   const [showGodToast, setShowGodToast] = useState(false)
   const prevStreakRef = useRef<number>(cleanStreak)
 
-  // ✅ 履歴レンジ（7日 / 30日）
-  const [historyRange, setHistoryRange] = useState<7 | 30>(7)
+  // ✅ 30日履歴ごほうび解放 演出（解放した瞬間だけ）
+  const [showHistoryUnlockFx, setShowHistoryUnlockFx] = useState(false)
+  const prevIsGodCleanRef = useRef<boolean>(false)
 
   // ✅ 神清潔段階（7 / 14 / 30）
   const cleanTier = useMemo(() => {
@@ -67,6 +68,10 @@ export default function App() {
   }, [cleanStreak])
 
   const isGodClean = cleanTier.key !== 'none'
+
+  // ✅ ごほうび解放：神清潔（7日以上）で30日履歴を自動解放
+  const historyRange: 7 | 30 = isGodClean ? 30 : 7
+  const historyRangeLabel = historyRange === 30 ? 'ごほうび30日' : '7日'
 
   // 起動時に履歴の最新を読む
   useEffect(() => {
@@ -91,6 +96,19 @@ export default function App() {
     prevStreakRef.current = cleanStreak
   }, [cleanStreak])
 
+  // ✅ 30日履歴の解放演出（初めて神清潔になった瞬間だけ）
+  useEffect(() => {
+    const prev = prevIsGodCleanRef.current
+    const now = isGodClean
+
+    if (!prev && now) {
+      setShowHistoryUnlockFx(true)
+      window.setTimeout(() => setShowHistoryUnlockFx(false), 1200)
+    }
+
+    prevIsGodCleanRef.current = now
+  }, [isGodClean])
+
   // ✅ 1分ごと + iOS復帰時にポイント再計算（PWA安定性）
   useEffect(() => {
     const tick = () => {
@@ -106,7 +124,6 @@ export default function App() {
     }
     const onFocus = () => tick()
     const onPageShow = (e: PageTransitionEvent) => {
-      // BFCache復帰でも確実に再計算
       if (e.persisted) tick()
       else tick()
     }
@@ -149,7 +166,7 @@ export default function App() {
     const before = point
     const t = nowMs()
 
-    // ✅ 日付跨ぎ対策：押した瞬間の todayKey を使う（useMemo固定をやめる）
+    // ✅ 日付跨ぎ対策：押した瞬間の todayKey を使う
     const todayKey = getTodayKeyJST()
 
     appendBathEvent({ ts: t, dayKey: todayKey, pointBefore: before })
@@ -173,7 +190,7 @@ export default function App() {
     }
   }
 
-  // 🫧 履歴（自動スケーリング + 7/30）
+  // 🫧 履歴（自動スケーリング + 7/30 自動）
   const historyData = useMemo(() => {
     const events = loadBathEvents()
     const now = new Date()
@@ -261,21 +278,23 @@ export default function App() {
         <div className="historyHeader">
           <p className="historyTitle">🫧 リセット履歴</p>
 
-          <div className="historyTabs" role="tablist" aria-label="履歴レンジ">
-            <button
-              type="button"
-              className={`historyTab ${historyRange === 7 ? 'active' : ''}`}
-              onClick={() => setHistoryRange(7)}
+          {/* ✅ 押せない：ごほうび解放の表示 */}
+          <div className="historyHint" aria-label="履歴レンジ">
+            <span
+              className={[
+                'historyPill',
+                historyRange === 30 ? 'reward' : '',
+                showHistoryUnlockFx ? 'unlockFx' : '',
+              ]
+                .filter(Boolean)
+                .join(' ')}
             >
-              7日
-            </button>
-            <button
-              type="button"
-              className={`historyTab ${historyRange === 30 ? 'active' : ''}`}
-              onClick={() => setHistoryRange(30)}
-            >
-              30日
-            </button>
+              {historyRangeLabel}
+            </span>
+
+            {!isGodClean && (
+              <span className="historyLock">✨ 7日で30日履歴が解放</span>
+            )}
           </div>
         </div>
 

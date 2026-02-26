@@ -42,12 +42,9 @@ body {
     ),
     linear-gradient(180deg, var(--bg0), var(--bg1));
   -webkit-text-size-adjust: 100%;
-
-  /* シンプルで丸い雰囲気 */
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     "Hiragino Sans", "Noto Sans JP", "Helvetica Neue", Arial, sans-serif;
 
-  /* ✅ 変なタップハイライトを基本消す（ボタンは個別に制御） */
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -56,11 +53,8 @@ body {
 .app {
   max-width: 520px;
   margin: 0 auto;
-
-  /* ✅ safe-area 対応（PWAの下端が詰まらない） */
   padding: calc(18px + env(safe-area-inset-top)) 14px
     calc(28px + env(safe-area-inset-bottom));
-
   text-align: center;
   color: var(--text);
 }
@@ -72,7 +66,7 @@ body {
   letter-spacing: 0.05em;
 }
 
-/* ✅ “押せるのは🛁だけ”を視覚的に守る（ボタン以外は基本クリック感を消す） */
+/* ✅ “押せるのは🛁だけ”を視覚的に守る */
 .card,
 .badge,
 .taunt,
@@ -95,7 +89,6 @@ body {
   background: var(--card);
   border: 1px solid var(--line);
   box-shadow: var(--shadow);
-
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
 }
@@ -156,7 +149,6 @@ body {
   border-radius: 14px;
   border: 1px solid rgba(255, 105, 180, 0.12);
 
-  /* “チップ”ではなく“ラベル/ステッカー”に寄せる */
   background: linear-gradient(
     180deg,
     rgba(255, 255, 255, 0.66),
@@ -189,7 +181,6 @@ body {
   transform: translateY(0);
   transition: transform 0.12s ease, filter 0.12s ease, box-shadow 0.2s ease;
 
-  /* ✅ iOSのタップ感 */
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
 
@@ -212,7 +203,6 @@ body {
   margin: 14px 0 0;
   padding: 10px 6px;
 
-  /* ボタンっぽさを消す */
   border-radius: 0;
   background: transparent;
   border: 0;
@@ -221,7 +211,7 @@ body {
   font-weight: 900;
 }
 
-/* ---------- Stats (lighter, less “clickable”) ---------- */
+/* ---------- Stats ---------- */
 
 .stats {
   margin-top: 12px;
@@ -251,7 +241,6 @@ body {
   pointer-events: none;
   z-index: 9999;
 
-  /* ✅ notch端末で安全（中央なので基本不要だけど保険） */
   padding: env(safe-area-inset-top) env(safe-area-inset-right)
     env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
@@ -360,12 +349,11 @@ body {
 .history {
   margin-top: 18px;
   padding: 14px;
-  border-radius: 16px; /* 少し小さくして軽く */
+  border-radius: 16px;
   background: rgba(255, 255, 255, 0.66);
   border: 1px solid rgba(255, 105, 180, 0.16);
 }
 
-/* ✅ 履歴エリア内は選択や変なタップ挙動を抑える（ただしタブは除外） */
 .history * {
   -webkit-tap-highlight-color: transparent;
 }
@@ -384,65 +372,102 @@ body {
   color: var(--sub);
 }
 
-/* “ボタンに見えない”タブ */
-.historyTabs {
+/* ✅ ごほうび解放の表示（押せない） */
+.historyHint {
   display: flex;
-  gap: 14px;
   align-items: center;
   justify-content: flex-end;
+  gap: 10px;
+  cursor: default;
+  user-select: none;
 }
 
-.historyTab {
-  appearance: none;
-  border: 0;
-  background: transparent;
-  padding: 6px 2px;
-  margin: 0;
-  border-radius: 0;
+.historyPill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 105, 180, 0.14);
+  background: rgba(255, 255, 255, 0.55);
 
   font-weight: 900;
-  color: rgba(107, 91, 110, 0.78);
-  letter-spacing: 0.02em;
+  font-size: 12px;
+  color: rgba(107, 91, 110, 0.82);
 
-  cursor: pointer;
   position: relative;
-  -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
+  overflow: hidden;
 }
 
-.historyTab::after {
+.historyPill.reward {
+  color: var(--text);
+  border-color: rgba(255, 105, 180, 0.22);
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.60),
+    rgba(255, 255, 255, 0.46)
+  );
+  box-shadow: 0 8px 18px rgba(255, 105, 180, 0.10);
+}
+
+/* ✅ 解放した瞬間だけ：キラッ + ぷにっ */
+.historyPill.unlockFx {
+  animation: rewardPop 1.1s ease both;
+}
+
+.historyPill.unlockFx::after {
   content: "";
   position: absolute;
-  left: 0;
-  right: 0;
-  bottom: -2px;
-  height: 3px;
-  border-radius: 999px;
-  background: transparent;
-  transform: scaleX(0.3);
-  opacity: 0;
-  transition: transform 0.18s ease, opacity 0.18s ease,
-    background 0.18s ease;
+  inset: -40%;
+  background: linear-gradient(
+    110deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.55) 50%,
+    transparent 70%
+  );
+  transform: translateX(-70%);
+  animation: rewardShimmer 1.1s ease both;
+  pointer-events: none;
+  mix-blend-mode: screen;
 }
 
-.historyTab.active {
-  color: var(--text);
+@keyframes rewardPop {
+  0% {
+    transform: scale(0.98);
+    box-shadow: 0 0 0 rgba(255, 105, 180, 0);
+  }
+  25% {
+    transform: scale(1.04);
+    box-shadow: 0 14px 28px rgba(255, 105, 180, 0.16);
+  }
+  60% {
+    transform: scale(1.01);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
-.historyTab.active::after {
-  background: linear-gradient(90deg, var(--pink), #ff79b8);
-  transform: scaleX(1);
-  opacity: 1;
+@keyframes rewardShimmer {
+  0% {
+    transform: translateX(-70%);
+    opacity: 0;
+  }
+  25% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(70%);
+    opacity: 0;
+  }
 }
 
-.historyTab:active {
-  opacity: 0.75;
-}
-
-.historyTab:focus-visible {
-  outline: 2px solid rgba(255, 95, 162, 0.35);
-  outline-offset: 4px;
-  border-radius: 10px;
+.historyLock {
+  font-size: 12px;
+  font-weight: 900;
+  color: rgba(107, 91, 110, 0.68);
+  white-space: nowrap;
 }
 
 .historyBars {
@@ -459,8 +484,6 @@ body {
   justify-content: flex-start;
   padding-bottom: 6px;
   scroll-snap-type: x proximity;
-
-  /* ✅ iOSのスクロールを気持ちよく */
   -webkit-overflow-scrolling: touch;
 }
 
@@ -515,5 +538,11 @@ body {
   }
   .puni-btn {
     transition: none;
+  }
+  .historyPill.unlockFx {
+    animation: none;
+  }
+  .historyPill.unlockFx::after {
+    animation: none;
   }
 }
