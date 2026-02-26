@@ -314,100 +314,140 @@ export default function App() {
     return '✨ いい感じ！'
   }
 
+  // UI用（短文化したラベル）
+  const dangerLabel = isGodClean ? `${cleanTier.label}浄化` : '危険'
+  const statusLabel = badge()
+
   return (
     <div className={`app ${isDanger ? 'dangerMode' : ''}`}>
-      <h1>ふろキャン♡</h1>
+      {/* --- Top --- */}
+      <header className="top">
+        <div className="brand">
+          <h1 className="brandTitle">ふろキャン♡</h1>
 
-      {isGodClean && (
-        <div className={`godBadge godBadge--${cleanTier.key}`}>
-          {cleanTier.badge} {cleanTier.label}モード {cleanTier.badge}
-          <span className="godBadgeSub">清潔連続 {cleanStreak} 日</span>
-        </div>
-      )}
-
-      <div className="card">
-        <p>現在ポイント</p>
-        <div className="cardSub">時間でふえる</div>
-
-        <div className={`count ${countPulse ? 'pulse' : ''}`}>{point}</div>
-
-        <div className="gauge">
-          <div className={gaugeFillClass} style={{ width: `${dangerPercent}%` }} />
-        </div>
-
-        <div className={`gaugeLabel ${isDanger ? 'danger' : ''}`}>
-          {isGodClean ? `${cleanTier.label}浄化度` : '危険度'}: {dangerPercent}%
-        </div>
-
-        <div className="badge">{badge()}</div>
-      </div>
-
-      <button className="puni-btn" onClick={onBathReset}>
-        🛁 おふろでリセット
-      </button>
-
-      <div className="taunt">{taunt()}</div>
-
-      <div className="stats">
-        <span>清潔連続: {cleanStreak}日</span>
-        <span>・</span>
-        <span>最長清潔: {bestClean}日</span>
-      </div>
-
-      <div className="history">
-        <div className="historyHeader">
-          <p className="historyTitle">🫧 リセット履歴</p>
-
-          <div className="historyHint" aria-label="履歴レンジ">
-            <span
-              className={[
-                'historyPill',
-                historyRange === 30 ? 'reward' : '',
-                showHistoryUnlockFx ? 'unlockFx' : '',
-              ]
-                .filter(Boolean)
-                .join(' ')}
-            >
-              {historyRangeLabel}
-            </span>
-
-            {!isGodClean && (
-              <span className="historyLock">✨ 7日で30日履歴が解放</span>
+          {/* 神清潔バッジ（押せない刻印） */}
+          <div className="badgeStamp" aria-label="神清潔">
+            {isGodClean ? (
+              <span className={`godBadge godBadge--${cleanTier.key}`}>
+                {cleanTier.badge} {cleanTier.label}
+              </span>
+            ) : (
+              <span className="godBadge godBadge--none"> </span>
             )}
           </div>
         </div>
+      </header>
 
-        <div className={`historyBars ${historyRange === 30 ? 'monthly' : ''}`}>
-          {historyData.items.map((d) => (
-            <div key={d.key} className="historyItem">
-              <div
-                className="historyBar"
-                style={{ height: `${d.height}px` }}
-                title={`${d.label}：${d.count}回`}
-              />
-              <span className="historyDay">{d.label}</span>
+      <main className="stage">
+        {/* --- Hero (主役：point) --- */}
+        <section className="hero" aria-label="現在のポイント">
+          <div className="heroNumber">
+            <span className={`heroValue ${countPulse ? 'pulse' : ''}`}>{point}</span>
+            <span className="heroUnit">pt</span>
+          </div>
+
+          <div className="heroMeta" aria-label="状態">
+            <span className="tag tag--danger">
+              {dangerLabel}: {dangerPercent}%
+            </span>
+            <span className="tag tag--status">{statusLabel}</span>
+            {isGodClean && (
+              <span className="tag tag--status">連続 {cleanStreak}</span>
+            )}
+          </div>
+
+          <div className="gaugeWrap">
+            <div className="gauge">
+              <div className={gaugeFillClass} style={{ width: `${dangerPercent}%` }} />
             </div>
-          ))}
+          </div>
+
+          {/* 旧カードの説明文は削除（“時間でふえる”など） */}
+        </section>
+
+        {/* --- CTA (🛁 only) --- */}
+        <div className="cta">
+          <button className="bathCta" onClick={onBathReset} aria-label="おふろでリセット">
+            <span className="bathEmoji" aria-hidden="true">
+              🛁
+            </span>
+          </button>
         </div>
 
-        <div className="historyMeta">
-          <span>最大: {historyData.max}回</span>
-        </div>
-      </div>
+        {/* --- Notes (taunt + stats) --- */}
+        <section className="notes" aria-label="メッセージと統計">
+          <p className="tauntLine">{taunt()}</p>
 
-      {/* ✅ 段階到達トースト */}
-      {showGodToast && (
-        <div className="godToast" aria-live="polite">
-          <div className="godToastInner">{toastText()}</div>
-        </div>
-      )}
+          <dl className="statsInline" aria-label="統計">
+            <div className="stat">
+              <dt>連続</dt>
+              <dd>{cleanStreak}</dd>
+            </div>
+            <div className="stat">
+              <dt>最長</dt>
+              <dd>{bestClean}</dd>
+            </div>
+          </dl>
+        </section>
 
-      {/* ✅ PWA更新/オフライン準備トースト（非インタラクティブ） */}
-      {showPwaToast && (
-        <div className="pwaToast" aria-live="polite">
-          <div className="pwaToastInner">{pwaToastText}</div>
-        </div>
-      )}
+        {/* --- History (別セクション・軽く) --- */}
+        <section className="historyPanel" aria-label="履歴">
+          <div className="panelHeader">
+            <h2 className="panelTitle">履歴</h2>
+
+            <span className="panelHint" aria-label="履歴レンジ">
+              <span
+                className={[
+                  'historyPill',
+                  historyRange === 30 ? 'reward' : '',
+                  showHistoryUnlockFx ? 'unlockFx' : '',
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
+              >
+                {historyRangeLabel}
+              </span>
+
+              {!isGodClean && (
+                <span className="historyLock">✨ 7日で30日履歴が解放</span>
+              )}
+            </span>
+          </div>
+
+          <div className="historyBody">
+            <div className={`historyBars ${historyRange === 30 ? 'monthly' : ''}`}>
+              {historyData.items.map((d) => (
+                <div key={d.key} className="historyItem">
+                  <div
+                    className="historyBar"
+                    style={{ height: `${d.height}px` }}
+                    title={`${d.label}：${d.count}回`}
+                  />
+                  <span className="historyDay">{d.label}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="historyMeta">
+              <span>最大: {historyData.max}回</span>
+            </div>
+          </div>
+        </section>
+
+        {/* ✅ 段階到達トースト */}
+        {showGodToast && (
+          <div className="godToast" aria-live="polite">
+            <div className="godToastInner">{toastText()}</div>
+          </div>
+        )}
+
+        {/* ✅ PWA更新/オフライン準備トースト（非インタラクティブ） */}
+        {showPwaToast && (
+          <div className="pwaToast" aria-live="polite">
+            <div className="pwaToastInner">{pwaToastText}</div>
+          </div>
+        )}
+      </main>
     </div>
   )
 }

@@ -1,8 +1,12 @@
 :root {
+  /* --- Base palette (keep your current feel) --- */
   --bg0: #fff7fb;
   --bg1: #fff1fa;
 
   --card: rgba(255, 255, 255, 0.78);
+  --panel: rgba(255, 255, 255, 0.66);
+  --panel2: rgba(255, 255, 255, 0.46);
+
   --line: rgba(255, 105, 180, 0.16);
 
   --text: #2b2230;
@@ -12,12 +16,22 @@
   --pink2: #ffa6d4;
   --pink3: #ffd1e8;
 
-  /* 影を少し繊細に */
+  /* --- Shadows (delicate) --- */
   --shadow: 0 10px 26px rgba(255, 105, 180, 0.12);
   --shadow2: 0 6px 14px rgba(17, 24, 39, 0.07);
 
+  /* --- Radius --- */
   --r-xl: 26px;
   --r-lg: 18px;
+  --r-md: 16px;
+
+  /* --- Spacing (token-ish) --- */
+  --s-1: 6px;
+  --s-2: 10px;
+  --s-3: 14px;
+  --s-4: 18px;
+  --s-5: 24px;
+  --s-6: 32px;
 
   --tap: 52px;
 }
@@ -55,9 +69,7 @@ body {
   margin: 0 auto;
   padding: calc(18px + env(safe-area-inset-top)) 14px
     calc(28px + env(safe-area-inset-bottom));
-  text-align: center;
   color: var(--text);
-
   position: relative;
 }
 
@@ -82,26 +94,26 @@ body {
       rgba(55, 30, 65, 0.10),
       transparent 60%
     );
-  filter: blur(0px);
 }
 
 .app.dangerMode::before {
   opacity: 1;
 }
 
-.app h1 {
-  margin: 12px 0 8px;
-  font-size: 28px;
-  font-weight: 900;
-  letter-spacing: 0.05em;
-}
-
 /* ✅ “押せるのは🛁だけ”を視覚的に守る */
-.card,
-.badge,
-.taunt,
-.stats,
-.history,
+.top,
+.brand,
+.badgeStamp,
+.hero,
+.heroMeta,
+.tag,
+.notes,
+.tauntLine,
+.statsInline,
+.historyPanel,
+.panelHeader,
+.panelHint,
+.historyBody,
 .historyBar,
 .historyDay,
 .historyMeta,
@@ -110,50 +122,138 @@ body {
   user-select: none;
 }
 
-/* ---------- Card ---------- */
+/* ---------- New Layout (App.tsx v0.5.0) ---------- */
 
-.card {
-  margin-top: 14px;
-  padding: 18px 16px;
+.stage {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-5);
+}
+
+/* --- Top --- */
+.top {
+  padding-top: env(safe-area-inset-top);
+}
+
+.brand {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-3);
+  margin: 0 0 var(--s-4);
+}
+
+.brandTitle {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  color: rgba(107, 91, 110, 0.88);
+}
+
+/* 神清潔：押せない刻印 */
+.badgeStamp {
+  display: flex;
+  align-items: center;
+  gap: var(--s-1);
+}
+
+.badgeStamp * {
+  cursor: default !important;
+}
+
+/* 既存 godBadge を “ヘッダー刻印” として軽く */
+.godBadge {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 105, 180, 0.18);
+  background: rgba(255, 255, 255, 0.58);
+  box-shadow: none;
+  font-weight: 900;
+  color: var(--pink);
+  position: relative;
+  overflow: hidden;
+}
+
+.godBadge--none {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.godBadge::after {
+  content: "";
+  position: absolute;
+  inset: -40%;
+  background: linear-gradient(
+    110deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.30) 50%,
+    transparent 70%
+  );
+  transform: translateX(-60%);
+  animation: godShimmer 2.2s linear infinite;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+
+@keyframes godShimmer {
+  to {
+    transform: translateX(60%);
+  }
+}
+
+/* 段階色（控えめに差を出す） */
+.godBadge--god {
+  color: var(--pink);
+}
+.godBadge--super {
+  color: #c026d3;
+}
+.godBadge--legend {
+  color: #b45309;
+}
+
+/* --- Hero (point) --- */
+.hero {
+  padding: var(--s-5) var(--s-4);
   border-radius: var(--r-xl);
   background: var(--card);
   border: 1px solid var(--line);
   box-shadow: var(--shadow);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-
   position: relative;
-  z-index: 1; /* danger overlayより上 */
+  z-index: 1;
 }
 
-.card p {
-  margin: 0;
-  color: var(--sub);
-  font-weight: 900;
+.heroNumber {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-2);
 }
 
-/* ✅ 説明文を薄く短く */
-.cardSub {
-  margin-top: 6px;
-  font-size: 12px;
-  font-weight: 900;
-  color: rgba(107, 91, 110, 0.72);
-  letter-spacing: 0.02em;
-}
-
-/* ---------- Counter ---------- */
-
-.count {
+.heroValue {
   font-size: 64px;
   font-weight: 900;
   line-height: 1;
-  margin: 12px 0 14px;
   letter-spacing: 0.02em;
   transform: translateZ(0);
 }
 
+.heroUnit {
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  color: rgba(107, 91, 110, 0.72);
+  transform: translateY(-2px);
+}
+
 /* ✅ ポイント増加の瞬間だけ「ふわっ」 */
-.count.pulse {
+.heroValue.pulse {
   animation: countPulse 0.26s ease both;
 }
 
@@ -172,8 +272,42 @@ body {
   }
 }
 
-/* ---------- Gauge ---------- */
+/* meta tags (印刷物っぽく＝押せない) */
+.heroMeta {
+  margin-top: var(--s-3);
+  display: flex;
+  gap: var(--s-2);
+  flex-wrap: wrap;
+}
 
+.tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 105, 180, 0.14);
+  background: rgba(255, 255, 255, 0.55);
+  font-weight: 900;
+  font-size: 12px;
+  color: rgba(107, 91, 110, 0.82);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tag--danger {
+  color: rgba(43, 34, 48, 0.88);
+  border-color: rgba(255, 105, 180, 0.16);
+}
+
+.tag--status {
+  color: rgba(107, 91, 110, 0.84);
+}
+
+.gaugeWrap {
+  margin-top: var(--s-4);
+}
+
+/* --- Gauge (reuse your existing look) --- */
 .gauge {
   height: 16px;
   border-radius: 999px;
@@ -189,53 +323,27 @@ body {
   transition: width 0.25s ease;
 }
 
-.gaugeLabel {
-  margin-top: 10px;
-  font-weight: 900;
-  color: var(--sub);
+/* ✅ God Gauge (pink glow) */
+.godGaugePink {
+  background: linear-gradient(90deg, #ff7dbb, #ffb2da, #ffe1f1);
+  box-shadow: 0 0 14px rgba(255, 125, 187, 0.45);
+  transition: background 0.4s ease, box-shadow 0.4s ease;
 }
 
-.gaugeLabel.danger {
-  color: #d7266a;
-}
-
-/* ---------- Status Badge (label look) ---------- */
-
-.badge {
-  margin-top: 12px;
-  display: inline-flex;
-  align-items: center;
+/* --- CTA (only button-like thing) --- */
+.cta {
+  display: flex;
   justify-content: center;
-  gap: 8px;
-
-  padding: 8px 12px;
-  border-radius: 14px;
-  border: 1px solid rgba(255, 105, 180, 0.12);
-
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.66),
-    rgba(255, 255, 255, 0.44)
-  );
-  box-shadow: none;
-
-  font-weight: 900;
-  color: var(--text);
-
-  -webkit-tap-highlight-color: transparent;
+  position: relative;
+  z-index: 1;
 }
 
-/* ---------- Primary Button (only “button-like” thing) ---------- */
-
-.puni-btn {
-  width: 100%;
-  margin-top: 14px;
-  min-height: var(--tap);
+.bathCta {
+  width: 92px;
+  height: 92px;
   border: 0;
-  border-radius: 999px;
+  border-radius: 28px;
   font-weight: 900;
-  font-size: 16px;
-  letter-spacing: 0.02em;
   color: #fff;
 
   background: linear-gradient(90deg, var(--pink), #ff79b8);
@@ -246,219 +354,106 @@ body {
 
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
-
   cursor: pointer;
-
-  position: relative;
-  z-index: 1;
 }
 
-.puni-btn:active {
+.bathEmoji {
+  font-size: 38px;
+  line-height: 1;
+  display: inline-block;
+  transform: translateY(1px);
+}
+
+.bathCta:active {
   transform: translateY(1px) scale(0.99);
   filter: brightness(0.98);
 }
 
-.puni-btn:focus-visible {
+.bathCta:focus-visible {
   outline: 3px solid rgba(255, 95, 162, 0.35);
   outline-offset: 4px;
 }
 
-/* ---------- Taunt (text-like; not button) ---------- */
-
-.taunt {
-  margin: 14px 0 0;
-  padding: 10px 6px;
-
-  border-radius: 0;
-  background: transparent;
-  border: 0;
-
-  color: var(--text);
-  font-weight: 900;
-
+/* --- Notes (taunt + stats) --- */
+.notes {
   position: relative;
   z-index: 1;
+  padding: 0 6px;
+  text-align: left;
 }
 
-/* ---------- Stats（圧縮） ---------- */
+.tauntLine {
+  margin: 0 0 var(--s-3);
+  padding: 0;
+  color: rgba(43, 34, 48, 0.92);
+  font-weight: 900;
+  line-height: 1.55;
+}
 
-.stats {
-  margin-top: 12px;
+/* “脚注っぽい”統計（2項目固定） */
+.statsInline {
+  margin: 0;
   padding: 10px 12px;
   border-radius: 16px;
 
-  background: rgba(255, 255, 255, 0.46);
+  background: var(--panel2);
   border: 1px dashed rgba(255, 105, 180, 0.18);
 
-  color: var(--sub);
-  font-weight: 900;
-
   display: flex;
+  gap: 14px;
+  justify-content: flex-start;
   flex-wrap: wrap;
-  justify-content: center;
-  gap: 6px;
 
-  position: relative;
-  z-index: 1;
-}
-
-/* ---------- God Toast ---------- */
-
-.godToast {
-  position: fixed;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
-  z-index: 9999;
-
-  padding: env(safe-area-inset-top) env(safe-area-inset-right)
-    env(safe-area-inset-bottom) env(safe-area-inset-left);
-}
-
-.godToastInner {
-  padding: 14px 18px;
-  border-radius: 18px;
+  color: rgba(107, 91, 110, 0.86);
   font-weight: 900;
-  background: rgba(255, 255, 255, 0.72);
-  border: 1px solid rgba(255, 105, 180, 0.22);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  animation: godPop 1.6s ease both;
-  color: #3a2536;
-  box-shadow: var(--shadow);
 }
 
-@keyframes godPop {
-  0% {
-    transform: translateY(10px) scale(0.96);
-    opacity: 0;
-  }
-  18% {
-    transform: translateY(0) scale(1.02);
-    opacity: 1;
-  }
-  70% {
-    transform: translateY(0) scale(1);
-    opacity: 1;
-  }
-  100% {
-    transform: translateY(-8px) scale(0.98);
-    opacity: 0;
-  }
-}
-
-/* ---------- God Badge ---------- */
-
-.godBadge {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 10px;
-  margin: 10px 0 6px;
-  padding: 10px 14px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 105, 180, 0.2);
-  background: rgba(255, 255, 255, 0.62);
-  box-shadow: var(--shadow2);
-  font-weight: 900;
-  position: relative;
-  overflow: hidden;
-
-  color: var(--pink);
-
-  z-index: 1;
-}
-
-.godBadge::after {
-  content: "";
-  position: absolute;
-  inset: -40%;
-  background: linear-gradient(
-    110deg,
-    transparent 30%,
-    rgba(255, 255, 255, 0.32) 50%,
-    transparent 70%
-  );
-  transform: translateX(-60%);
-  animation: godShimmer 2.2s linear infinite;
-  pointer-events: none;
-  mix-blend-mode: screen;
-}
-
-@keyframes godShimmer {
-  to {
-    transform: translateX(60%);
-  }
-}
-
-.godBadgeSub {
+.stat dt {
   font-size: 12px;
-  font-weight: 900;
-  color: var(--sub);
-  opacity: 0.9;
+  letter-spacing: 0.04em;
+  margin-bottom: 2px;
+  color: rgba(107, 91, 110, 0.72);
 }
 
-/* 段階色（控えめに差を出す） */
-.godBadge--god {
-  color: var(--pink);
-}
-.godBadge--super {
-  color: #c026d3;
-}
-.godBadge--legend {
-  color: #b45309;
+.stat dd {
+  margin: 0;
+  font-size: 18px;
+  color: rgba(43, 34, 48, 0.92);
 }
 
-/* ---------- God Gauge (pink glow) ---------- */
-
-.godGaugePink {
-  background: linear-gradient(90deg, #ff7dbb, #ffb2da, #ffe1f1);
-  box-shadow: 0 0 14px rgba(255, 125, 187, 0.55);
-  transition: background 0.4s ease, box-shadow 0.4s ease;
-}
-
-/* ---------- History ---------- */
-
-.history {
-  margin-top: 18px;
-  padding: 14px;
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.66);
-  border: 1px solid rgba(255, 105, 180, 0.16);
-
+/* --- History panel (separate + non-interactive) --- */
+.historyPanel {
+  margin-top: 2px;
+  padding-top: var(--s-4);
+  border-top: 1px solid rgba(255, 105, 180, 0.14);
   position: relative;
   z-index: 1;
 }
 
-.history * {
-  -webkit-tap-highlight-color: transparent;
-}
-
-.historyHeader {
+.panelHeader {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   justify-content: space-between;
   gap: 12px;
   margin-bottom: 10px;
 }
 
-.historyTitle {
+.panelTitle {
   margin: 0;
   font-weight: 900;
-  color: var(--sub);
+  font-size: 14px;
+  color: rgba(107, 91, 110, 0.86);
 }
 
-/* ✅ ごほうび解放の表示（押せない） */
-.historyHint {
+.panelHint {
   display: flex;
   align-items: center;
   justify-content: flex-end;
   gap: 10px;
-  cursor: default;
-  user-select: none;
+  white-space: nowrap;
 }
 
+/* 既存の pill / lock を流用（押せない見た目維持） */
 .historyPill {
   display: inline-flex;
   align-items: center;
@@ -475,10 +470,12 @@ body {
 
   position: relative;
   overflow: hidden;
+  cursor: default;
+  user-select: none;
 }
 
 .historyPill.reward {
-  color: var(--text);
+  color: rgba(43, 34, 48, 0.92);
   border-color: rgba(255, 105, 180, 0.22);
   background: linear-gradient(
     90deg,
@@ -544,9 +541,24 @@ body {
   font-size: 12px;
   font-weight: 900;
   color: rgba(107, 91, 110, 0.68);
-  white-space: nowrap;
 }
 
+.historyBody {
+  opacity: 0.98;
+}
+
+/* 履歴は “押せない” をより強く（万一リンクが混ざっても） */
+.historyPanel button,
+.historyPanel [role="button"],
+.historyPanel a {
+  pointer-events: none;
+}
+
+.historyPanel * {
+  cursor: default !important;
+}
+
+/* --- History bars (reuse) --- */
 .historyBars {
   display: flex;
   align-items: flex-end;
@@ -598,35 +610,50 @@ body {
   font-weight: 800;
 }
 
-/* ---------- Accessibility ---------- */
+/* ---------- Toasts ---------- */
 
-@media (prefers-reduced-motion: reduce) {
-  .godToastInner {
-    animation: none;
+.godToast {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 9999;
+
+  padding: env(safe-area-inset-top) env(safe-area-inset-right)
+    env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+.godToastInner {
+  padding: 14px 18px;
+  border-radius: 18px;
+  font-weight: 900;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(255, 105, 180, 0.22);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  animation: godPop 1.6s ease both;
+  color: #3a2536;
+  box-shadow: var(--shadow);
+}
+
+@keyframes godPop {
+  0% {
+    transform: translateY(10px) scale(0.96);
+    opacity: 0;
   }
-  .godBadge::after {
-    animation: none;
+  18% {
+    transform: translateY(0) scale(1.02);
+    opacity: 1;
   }
-  .gaugeFill {
-    transition: none;
+  70% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
   }
-  .historyBar {
-    transition: none;
-  }
-  .puni-btn {
-    transition: none;
-  }
-  .historyPill.unlockFx {
-    animation: none;
-  }
-  .historyPill.unlockFx::after {
-    animation: none;
-  }
-  .count.pulse {
-    animation: none;
-  }
-  .app::before {
-    transition: none;
+  100% {
+    transform: translateY(-8px) scale(0.98);
+    opacity: 0;
   }
 }
 
@@ -679,8 +706,48 @@ body {
   }
 }
 
+/* ---------- Accessibility ---------- */
+
 @media (prefers-reduced-motion: reduce) {
+  .godToastInner {
+    animation: none;
+  }
+  .godBadge::after {
+    animation: none;
+  }
+  .gaugeFill {
+    transition: none;
+  }
+  .historyBar {
+    transition: none;
+  }
+  .bathCta {
+    transition: none;
+  }
+  .historyPill.unlockFx {
+    animation: none;
+  }
+  .historyPill.unlockFx::after {
+    animation: none;
+  }
+  .heroValue.pulse {
+    animation: none;
+  }
+  .app::before {
+    transition: none;
+  }
   .pwaToastInner {
     animation: none;
   }
+}
+
+/* ---------- Backward-compat (in case old classes remain somewhere) ---------- */
+/* 旧DOMが残っても “押せそう” が出ないように */
+.card,
+.badge,
+.taunt,
+.stats,
+.history {
+  cursor: default;
+  user-select: none;
 }
