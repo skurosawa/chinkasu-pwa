@@ -26,10 +26,41 @@
   box-sizing: border-box;
 }
 
+/* ✅ iOS Safari / PWAでの土台を安定化 */
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  color: var(--text);
+  background: radial-gradient(
+      1200px 600px at 50% -120px,
+      rgba(255, 95, 162, 0.18),
+      transparent 60%
+    ),
+    linear-gradient(180deg, var(--bg0), var(--bg1));
+  -webkit-text-size-adjust: 100%;
+
+  /* シンプルで丸い雰囲気 */
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "Hiragino Sans", "Noto Sans JP", "Helvetica Neue", Arial, sans-serif;
+
+  /* ✅ 変なタップハイライトを基本消す（ボタンは個別に制御） */
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ---------- App Shell ---------- */
+
 .app {
   max-width: 520px;
   margin: 0 auto;
-  padding: 18px 14px 28px;
+
+  /* ✅ safe-area 対応（PWAの下端が詰まらない） */
+  padding: calc(18px + env(safe-area-inset-top)) 14px
+    calc(28px + env(safe-area-inset-bottom));
+
   text-align: center;
   color: var(--text);
 }
@@ -41,6 +72,20 @@
   letter-spacing: 0.05em;
 }
 
+/* ✅ “押せるのは🛁だけ”を視覚的に守る（ボタン以外は基本クリック感を消す） */
+.card,
+.badge,
+.taunt,
+.stats,
+.history,
+.historyBar,
+.historyDay,
+.historyMeta,
+.godBadge {
+  cursor: default;
+  user-select: none;
+}
+
 /* ---------- Card ---------- */
 
 .card {
@@ -50,6 +95,7 @@
   background: var(--card);
   border: 1px solid var(--line);
   box-shadow: var(--shadow);
+
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
 }
@@ -121,9 +167,7 @@
   font-weight: 900;
   color: var(--text);
 
-  cursor: default;
   -webkit-tap-highlight-color: transparent;
-  user-select: none;
 }
 
 /* ---------- Primary Button (only “button-like” thing) ---------- */
@@ -138,16 +182,28 @@
   font-size: 16px;
   letter-spacing: 0.02em;
   color: #fff;
+
   background: linear-gradient(90deg, var(--pink), #ff79b8);
   box-shadow: 0 14px 30px rgba(255, 95, 162, 0.28);
+
   transform: translateY(0);
-  transition: transform 0.12s ease, filter 0.12s ease;
+  transition: transform 0.12s ease, filter 0.12s ease, box-shadow 0.2s ease;
+
+  /* ✅ iOSのタップ感 */
   -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+
+  cursor: pointer;
 }
 
 .puni-btn:active {
   transform: translateY(1px) scale(0.99);
   filter: brightness(0.98);
+}
+
+.puni-btn:focus-visible {
+  outline: 3px solid rgba(255, 95, 162, 0.35);
+  outline-offset: 4px;
 }
 
 /* ---------- Taunt (text-like; not button) ---------- */
@@ -182,9 +238,6 @@
   flex-wrap: wrap;
   justify-content: center;
   gap: 6px;
-
-  cursor: default;
-  user-select: none;
 }
 
 /* ---------- God Toast ---------- */
@@ -197,6 +250,10 @@
   justify-content: center;
   pointer-events: none;
   z-index: 9999;
+
+  /* ✅ notch端末で安全（中央なので基本不要だけど保険） */
+  padding: env(safe-area-inset-top) env(safe-area-inset-right)
+    env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
 
 .godToastInner {
@@ -308,6 +365,11 @@
   border: 1px solid rgba(255, 105, 180, 0.16);
 }
 
+/* ✅ 履歴エリア内は選択や変なタップ挙動を抑える（ただしタブは除外） */
+.history * {
+  -webkit-tap-highlight-color: transparent;
+}
+
 .historyHeader {
   display: flex;
   align-items: center;
@@ -345,6 +407,7 @@
   cursor: pointer;
   position: relative;
   -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 .historyTab::after {
@@ -396,6 +459,9 @@
   justify-content: flex-start;
   padding-bottom: 6px;
   scroll-snap-type: x proximity;
+
+  /* ✅ iOSのスクロールを気持ちよく */
+  -webkit-overflow-scrolling: touch;
 }
 
 .historyBars.monthly .historyItem {
@@ -417,7 +483,6 @@
   background: linear-gradient(180deg, #ff7dbb, #ffb2da);
   border-radius: 8px 8px 4px 4px;
   transition: height 0.2s ease;
-  cursor: default;
 }
 
 .historyDay {

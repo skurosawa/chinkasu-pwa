@@ -8,28 +8,44 @@ const getTodayKeyJST = () =>
 
 const nowMs = () => Date.now()
 
+// ✅ localStorage 例外対策（iOSプライベート/制限などで落ちないように）
+const safeGet = (key: string) => {
+  try {
+    return localStorage.getItem(key)
+  } catch {
+    return null
+  }
+}
+
+const safeSet = (key: string, value: string) => {
+  try {
+    localStorage.setItem(key, value)
+    return true
+  } catch {
+    return false
+  }
+}
+
 const getOrInitLastResetAt = () => {
-  const v = localStorage.getItem('lastResetAt')
+  const v = safeGet('lastResetAt')
   if (v) return Number(v)
   const t = nowMs()
-  localStorage.setItem('lastResetAt', String(t))
+  safeSet('lastResetAt', String(t))
   return t
 }
 
 export default function App() {
-  const todayKey = useMemo(() => getTodayKeyJST(), [])
-
   const [point, setPoint] = useState(0)
   const [lastResetAt, setLastResetAt] = useState<number>(() =>
     getOrInitLastResetAt(),
   )
 
   const [cleanStreak, setCleanStreak] = useState<number>(() =>
-    Number(localStorage.getItem('currentCleanStreak') ?? '0'),
+    Number(safeGet('currentCleanStreak') ?? '0'),
   )
 
   const [bestClean, setBestClean] = useState<number>(() =>
-    Number(localStorage.getItem('bestCleanStreak') ?? '0'),
+    Number(safeGet('bestCleanStreak') ?? '0'),
   )
 
   const [lastBathPoint, setLastBathPoint] = useState<number | null>(null)
@@ -59,7 +75,7 @@ export default function App() {
     setLastBathPoint(last ? last.pointBefore : null)
   }, [])
 
-  // ✅ 7日到達した瞬間だけ祝う（段階が変わった瞬間に出す）
+  // ✅ 7/14/30 到達した瞬間だけ祝う（段階が変わった瞬間に出す）
   useEffect(() => {
     const prev = prevStreakRef.current
 
@@ -75,24 +91,43 @@ export default function App() {
     prevStreakRef.current = cleanStreak
   }, [cleanStreak])
 
-  // 1分ごとにポイント再計算
+  // ✅ 1分ごと + iOS復帰時にポイント再計算（PWA安定性）
   useEffect(() => {
     const tick = () => {
       const p = calcPoint(nowMs(), lastResetAt, MAX_POINT)
       setPoint(p)
     }
+
     tick()
     const id = window.setInterval(tick, 60 * 1000)
-    return () => window.clearInterval(id)
+
+    const onVis = () => {
+      if (!document.hidden) tick()
+    }
+    const onFocus = () => tick()
+    const onPageShow = (e: PageTransitionEvent) => {
+      // BFCache復帰でも確実に再計算
+      if (e.persisted) tick()
+      else tick()
+    }
+
+    document.addEventListener('visibilitychange', onVis)
+    window.addEventListener('focus', onFocus)
+    window.addEventListener('pageshow', onPageShow)
+
+    return () => {
+      window.clearInterval(id)
+      document.removeEventListener('visibilitychange', onVis)
+      window.removeEventListener('focus', onFocus)
+      window.removeEventListener('pageshow', onPageShow)
+    }
   }, [lastResetAt])
 
   const dangerPercent = Math.round((point / MAX_POINT) * 100)
   const isDanger = point >= 24
 
   // ✅ 神清潔中はピンク浄化ゲージにする
-  const gaugeFillClass = isGodClean
-    ? 'gaugeFill godGaugePink'
-    : 'gaugeFill'
+  const gaugeFillClass = isGodClean ? 'gaugeFill godGaugePink' : 'gaugeFill'
 
   const badge = () => {
     if (point === 0) return 'きらきら清潔✨'
@@ -114,14 +149,17 @@ export default function App() {
     const before = point
     const t = nowMs()
 
+    // ✅ 日付跨ぎ対策：押した瞬間の todayKey を使う（useMemo固定をやめる）
+    const todayKey = getTodayKeyJST()
+
     appendBathEvent({ ts: t, dayKey: todayKey, pointBefore: before })
     setLastBathPoint(before)
 
-    localStorage.setItem('lastResetAt', String(t))
+    safeSet('lastResetAt', String(t))
     setLastResetAt(t)
     setPoint(0)
 
-    const lastBathDay = localStorage.getItem('lastBathDay') ?? ''
+    const lastBathDay = safeGet('lastBathDay') ?? ''
     if (lastBathDay !== todayKey) {
       const next = cleanStreak + 1
       const nextBest = Math.max(bestClean, next)
@@ -129,9 +167,9 @@ export default function App() {
       setCleanStreak(next)
       setBestClean(nextBest)
 
-      localStorage.setItem('currentCleanStreak', String(next))
-      localStorage.setItem('bestCleanStreak', String(nextBest))
-      localStorage.setItem('lastBathDay', todayKey)
+      safeSet('currentCleanStreak', String(next))
+      safeSet('bestCleanStreak', String(nextBest))
+      safeSet('lastBathDay', todayKey)
     }
   }
 
@@ -192,10 +230,7 @@ export default function App() {
         <div className="count">{point}</div>
 
         <div className="gauge">
-          <div
-            className={gaugeFillClass}
-            style={{ width: `${dangerPercent}%` }}
-          />
+          <div className={gaugeFillClass} style={{ width: `${dangerPercent}%` }} />
         </div>
 
         <div className={`gaugeLabel ${isDanger ? 'danger' : ''}`}>
@@ -218,9 +253,7 @@ export default function App() {
         <span>・</span>
         <span>上限: {MAX_POINT}</span>
         <span>・</span>
-        <span>
-          直近🛁: {lastBathPoint === null ? '-' : `${lastBathPoint}→0`}
-        </span>
+        <span>直近🛁: {lastBathPoint === null ? '-' : `${lastBathPoint}→0`}</span>
       </div>
 
       {/* 🫧 履歴グラフ */}
