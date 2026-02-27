@@ -28,7 +28,10 @@ body {
   height: 100%;
 }
 
+/* ✅ iOSの表示領域変動に強い（PWA / Safari） */
 body {
+  min-height: 100svh;
+
   margin: 0;
   color: var(--text);
   background: radial-gradient(
@@ -42,6 +45,11 @@ body {
     "Helvetica Neue", Arial, sans-serif;
 
   -webkit-tap-highlight-color: transparent;
+
+  /* ✅ 文字の見え方を安定化（iOSで太字が潰れにくく） */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 /* ---------- App Shell ---------- */
@@ -135,9 +143,22 @@ body {
   background: var(--card);
   border: 1px solid var(--line);
   box-shadow: var(--shadow);
+
+  /* ✅ 透明感の強化（対応環境のみ） */
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+
+  /* ✅ backdrop-filter 非対応のときも“白カード感”が保てる */
+  background-color: rgba(255, 255, 255, 0.84);
+
   text-align: center;
+}
+
+/* ✅ backdrop-filterが効く環境では元の透け感に戻す（安定＆綺麗） */
+@supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  .hero {
+    background-color: var(--card);
+  }
 }
 
 /* ✨ ほんのり空気感 */
