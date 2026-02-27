@@ -60,6 +60,29 @@ const diffDaysByDayKey = (todayKey: string, lastKey: string): number | null => {
   return dayA - dayB
 }
 
+// ✅ 日付キー(JST) → 連番(UTC日) に変換（履歴生成を端末TZから独立させる）
+const dayIndexFromDayKey = (key: string): number | null => {
+  const p = parseDayKey(key)
+  if (!p) return null
+  return Math.floor(Date.UTC(p.y, p.m - 1, p.d) / 86400000)
+}
+
+// ✅ 連番(UTC日) → 日付キー(JST互換 "YYYY/M/D") に戻す
+const dayKeyFromDayIndex = (idx: number) => {
+  const d = new Date(idx * 86400000) // UTC基準
+  const y = d.getUTCFullYear()
+  const m = d.getUTCMonth() + 1
+  const day = d.getUTCDate()
+  return `${y}/${m}/${day}`
+}
+
+// ✅ 表示用ラベル（"MM/DD" 相当を安定生成： "2/7" みたいに出る）
+const labelFromDayKey = (key: string) => {
+  const p = parseDayKey(key)
+  if (!p) return key
+  return `${p.m}/${p.d}`
+}
+
 export default function App() {
   // point = 「最後の🛁からの経過時間（h）」として維持（危険度ゲージに使う）
   const [point, setPoint] = useState(0)
@@ -178,8 +201,7 @@ export default function App() {
     if (!shared) await copyText(text)
   }
 
-  const onBathReset = () => {
-    // ✅ 押下演出（軽量）
+const onBathReset = () => {
     setBathFx(true)
     window.setTimeout(() => setBathFx(false), 400)
 
@@ -187,20 +209,26 @@ export default function App() {
     const t = nowMs()
     const todayKey = getTodayKeyJST()
 
-    appendBathEvent({ ts: t, dayKey: todayKey, pointBefore: before })
+    const lastBathDay = safeGet('lastBathDay') ?? ''
+
+    // ✅ 同じ日は「履歴にも積まない」（多押し/連打対策）
+    if (lastBathDay === todayKey) {
+      safeSet('lastResetAt', String(t))
+      setLastResetAt(t)
+      setPoint(0)
+      return
+    }
+    // ✅ ここに移動（同日連打では記録されない）
+    const shouldRecord = before >= 1
+    if (shouldRecord) {
+      appendBathEvent({ ts: t, dayKey: todayKey, pointBefore: before })
+    }
 
     safeSet('lastResetAt', String(t))
     setLastResetAt(t)
     setPoint(0)
 
-    const lastBathDay = safeGet('lastBathDay') ?? ''
-
-    // ✅ 同じ日は加算しない（多押し対策）
-    if (lastBathDay === todayKey) return
-
-    // ✅ 日付差で「連続 or リセット」を決める
     const diff = lastBathDay ? diffDaysByDayKey(todayKey, lastBathDay) : null
-
     const next = diff === 1 ? cleanStreak + 1 : 1
     const nextBest = Math.max(bestClean, next)
 
@@ -215,16 +243,24 @@ export default function App() {
   // 🫧 履歴（自動スケーリング + 7/30 自動）
   const historyData = useMemo(() => {
     const events = loadBathEvents()
-    const now = new Date()
+
+    // ✅ dayKey ごとに回数を集計（O(n)）
+    const countByDayKey = new Map<string, number>()
+    for (const e of events) {
+      const k = e.dayKey
+      countByDayKey.set(k, (countByDayKey.get(k) ?? 0) + 1)
+    }
+
+    // ✅ 「今日(JST)」を基準に、端末TZに依存せず日付キー列を作る
+    const todayKey = getTodayKeyJST()
+    const todayIdx = dayIndexFromDayKey(todayKey)
 
     const days: { key: string; label: string; count: number }[] = []
     for (let i = historyRange - 1; i >= 0; i--) {
-      const d = new Date(now)
-      d.setDate(now.getDate() - i)
-
-      const key = d.toLocaleDateString('ja-JP', { timeZone: 'Asia/Tokyo' })
-      const count = events.filter((e) => e.dayKey === key).length
-      const label = key.slice(5) // "MM/DD"
+      const key =
+        todayIdx === null ? todayKey : dayKeyFromDayIndex(todayIdx - i)
+      const count = countByDayKey.get(key) ?? 0
+      const label = labelFromDayKey(key)
       days.push({ key, label, count })
     }
 
@@ -278,10 +314,7 @@ export default function App() {
 
             {/* ✅ コメント付きバッジ（押せない・増えすぎない） */}
             <div
-              className={[
-                'dangerBadge',
-                `dangerBadge--${dangerLevel}`,
-              ].join(' ')}
+              className={['dangerBadge', `dangerBadge--${dangerLevel}`].join(' ')}
               aria-hidden="true"
             >
               {dangerComment}
