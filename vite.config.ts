@@ -34,9 +34,9 @@ export default defineConfig(({ mode }) => {
         ],
 
         manifest: {
-          name: 'ふろキャン♡',
-          short_name: 'ふろキャン',
-          description: 'ふろキャン♡｜ゆめかわ清潔で時間と戦う、ちょっと煽り系ジョークPWA🫧',
+          name: 'ふろリズム',
+          short_name: 'ふろリズム',
+          description: 'ふろリズム｜ゆめかわ清潔で時間と戦う、ちょっと煽り系ジョークPWA🫧',
 
           theme_color: '#FF69B4',
           background_color: '#FFF1FA',

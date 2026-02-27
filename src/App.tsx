@@ -192,7 +192,7 @@ export default function App() {
     const sparkle = isGodClean ? ' ✨' : ''
     // URLは入れない（要望）
     return `🛁 おふろ入った〜 🫧 ${streakText}${sparkle}
-#ふろキャン`
+#ふろリズム`
   }
 
   const onShare = async () => {
@@ -281,7 +281,7 @@ const onBathReset = () => {
     <div className={`app ${isDanger ? 'dangerMode' : ''}`}>
       <header className="top">
         <div className="brand">
-          <h1 className="brandTitle">ふろキャン♡</h1>
+          <h1 className="brandTitle">ふろリズム</h1>
           {isGodClean && (
             <span className={`godBadge godBadge--${cleanTier.key}`}>
               {cleanTier.badge} {cleanTier.label}
