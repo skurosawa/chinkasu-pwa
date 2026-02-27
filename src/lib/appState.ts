@@ -30,14 +30,6 @@ const safeSet = (key: string, value: string) => {
 
 const nowMs = () => Date.now()
 
-const defaultState = (): AppStateV1 => ({
-  schemaVersion: 1,
-  lastResetAt: nowMs(),
-  lastBathDay: '',
-  currentCleanStreak: 0,
-  bestCleanStreak: 0,
-})
-
 const isValidStateV1 = (s: any): s is AppStateV1 => {
   return (
     s &&
@@ -55,6 +47,7 @@ const isValidStateV1 = (s: any): s is AppStateV1 => {
 /**
  * 旧キーからV1へ移行（既存互換）
  * - lastResetAt / lastBathDay / currentCleanStreak / bestCleanStreak を吸い上げる
+ * - 旧キーが無くても “妥当な初期値” を生成する
  */
 export function migrateStateIfNeeded(): AppStateV1 {
   // すでに新stateがあればそれが正
@@ -68,20 +61,29 @@ export function migrateStateIfNeeded(): AppStateV1 {
     }
   }
 
-  // 旧キー吸い上げ
-  const lastResetAt = Number(safeGet('lastResetAt') ?? `${nowMs()}`)
+  // 旧キー吸い上げ（無ければ初期値へ）
+  const lastResetAtRaw = safeGet('lastResetAt')
+  const lastResetAtNum = lastResetAtRaw ? Number(lastResetAtRaw) : NaN
+  const lastResetAt = Number.isFinite(lastResetAtNum) ? lastResetAtNum : nowMs()
+
   const lastBathDay = safeGet('lastBathDay') ?? ''
-  const currentCleanStreak = Number(safeGet('currentCleanStreak') ?? '0')
-  const bestCleanStreak = Number(safeGet('bestCleanStreak') ?? '0')
+
+  const currentCleanRaw = safeGet('currentCleanStreak')
+  const currentCleanNum = currentCleanRaw ? Number(currentCleanRaw) : NaN
+  const currentCleanStreak = Number.isFinite(currentCleanNum)
+    ? currentCleanNum
+    : 0
+
+  const bestCleanRaw = safeGet('bestCleanStreak')
+  const bestCleanNum = bestCleanRaw ? Number(bestCleanRaw) : NaN
+  const bestCleanStreak = Number.isFinite(bestCleanNum) ? bestCleanNum : 0
 
   const next: AppStateV1 = {
     schemaVersion: 1,
-    lastResetAt: Number.isFinite(lastResetAt) ? lastResetAt : nowMs(),
+    lastResetAt,
     lastBathDay,
-    currentCleanStreak: Number.isFinite(currentCleanStreak)
-      ? currentCleanStreak
-      : 0,
-    bestCleanStreak: Number.isFinite(bestCleanStreak) ? bestCleanStreak : 0,
+    currentCleanStreak,
+    bestCleanStreak,
   }
 
   saveState(next)

@@ -1,40 +1,21 @@
 import './App.css'
 import { useEffect, useMemo, useState } from 'react'
-import { calcPoint, MAX_POINT } from './lib/points'
+import {
+  calcPoint,
+  MAX_POINT,
+  getDangerComment,
+  getDangerLevel,
+  getDangerPercent,
+} from './lib/points'
 import { loadBathEvents, appendBathEvent } from './lib/bathHistory'
 import { copyText, tryNativeShare } from './lib/share'
+import { loadState, saveState, type AppStateV1 } from './lib/appState'
 
 const nowMs = () => Date.now()
 
 // ✅ JSTの「日付キー」(例: 2026/2/27) ※既存互換のため維持
 const getTodayKeyJST = () =>
   new Date().toLocaleDateString('ja-JP', { timeZone: 'Asia/Tokyo' })
-
-// ✅ localStorage 例外対策（iOSプライベート/制限などで落ちないように）
-const safeGet = (key: string) => {
-  try {
-    return localStorage.getItem(key)
-  } catch {
-    return null
-  }
-}
-
-const safeSet = (key: string, value: string) => {
-  try {
-    localStorage.setItem(key, value)
-    return true
-  } catch {
-    return false
-  }
-}
-
-const getOrInitLastResetAt = () => {
-  const v = safeGet('lastResetAt')
-  if (v) return Number(v)
-  const t = nowMs()
-  safeSet('lastResetAt', String(t))
-  return t
-}
 
 // ✅ "YYYY/M/D" or "YYYY/MM/DD" or "YYYY-MM-DD" を安全にパース
 const parseDayKey = (
@@ -84,22 +65,19 @@ const labelFromDayKey = (key: string) => {
 }
 
 export default function App() {
+  // ✅ state集約：起動時にまとめてロード（旧キーは appState 側で migrate 済み）
+  const [appState, setAppState] = useState<AppStateV1>(() => loadState())
+
   // point = 「最後の🛁からの経過時間（h）」として維持（危険度ゲージに使う）
   const [point, setPoint] = useState(0)
 
-  const [lastResetAt, setLastResetAt] = useState<number>(() =>
-    getOrInitLastResetAt(),
-  )
-
-  const [cleanStreak, setCleanStreak] = useState<number>(() =>
-    Number(safeGet('currentCleanStreak') ?? '0'),
-  )
-  const [bestClean, setBestClean] = useState<number>(() =>
-    Number(safeGet('bestCleanStreak') ?? '0'),
-  )
-
   // ✅ 🛁ボタン押下エフェクト
   const [bathFx, setBathFx] = useState(false)
+
+  const cleanStreak = appState.currentCleanStreak
+  const bestClean = appState.bestCleanStreak
+  const lastResetAt = appState.lastResetAt
+  const lastBathDay = appState.lastBathDay
 
   // ✅ 神清潔段階（7 / 14 / 30）
   const cleanTier = useMemo(() => {
@@ -113,21 +91,27 @@ export default function App() {
   const isGodClean = cleanTier.key !== 'none'
   const historyRange: 7 | 30 = isGodClean ? 30 : 7
 
-  // ✅ 起動時：前回が「一昨日以前」なら streak を折る
+  // ✅ 起動時：前回が「一昨日以前」なら streak を折る（stateへ反映）
   useEffect(() => {
-    const todayKey = getTodayKeyJST()
-    const lastBathDay = safeGet('lastBathDay') ?? ''
     if (!lastBathDay) return
 
+    const todayKey = getTodayKeyJST()
     const diff = diffDaysByDayKey(todayKey, lastBathDay)
 
     // 1日でも空いたら即リセット
-    if (diff !== null && diff >= 2) {
-      setCleanStreak(0)
-      safeSet('currentCleanStreak', '0')
-      safeSet('bestCleanStreak', String(bestClean)) // 念のため維持
+    if (diff !== null && diff >= 2 && cleanStreak !== 0) {
+      setAppState((prev) => {
+        const next: AppStateV1 = {
+          ...prev,
+          currentCleanStreak: 0,
+          // bestは保持（念のため変えない）
+        }
+        saveState(next)
+        return next
+      })
     }
-  }, [bestClean])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []) // 起動時だけでOK（lastBathDayはstate内で一貫している）
 
   // ✅ 1分ごと + iOS復帰時にポイント再計算（PWA安定性）
   useEffect(() => {
@@ -144,10 +128,7 @@ export default function App() {
       if (!document.hidden) tick()
     }
     const onFocus = () => tick()
-    const onPageShow = (e: PageTransitionEvent) => {
-      if (e.persisted) tick()
-      else tick()
-    }
+    const onPageShow = (_e: PageTransitionEvent) => tick()
 
     document.addEventListener('visibilitychange', onVis)
     window.addEventListener('focus', onFocus)
@@ -162,27 +143,9 @@ export default function App() {
   }, [lastResetAt])
 
   // ✅ 危険度（0〜100） ※ MAX_POINT=72h
-  const dangerPercent = Math.min(100, Math.round((point / MAX_POINT) * 100))
-
-  // ✅ 6段階（12h刻みベース）※色用クラス
-  const dangerLevel = useMemo(() => {
-    if (point >= 72) return 'extreme2' // 72h〜
-    if (point >= 48) return 'extreme' // 48〜71h
-    if (point >= 36) return 'high' // 36〜47h
-    if (point >= 24) return 'mid' // 24〜35h
-    if (point >= 12) return 'lowmid' // 12〜23h
-    return 'low' // 0〜11h
-  }, [point])
-
-  // ✅ ゲージ下コメント（6段階）
-  const dangerComment = useMemo(() => {
-    if (point >= 72) return '……今すぐおふろ。ね？（ほんき）'
-    if (point >= 48) return '放置姫しすぎ…？今すぐおふろ行こ？'
-    if (point >= 36) return 'ほんとに今日は入ろ？ね？'
-    if (point >= 24) return 'そろそろおふろしたくなってきたかも？'
-    if (point >= 12) return '今日もちゃんとキープできてるね〜♡'
-    return 'きらきら清潔〜 えらいっ♡'
-  }, [point])
+  const dangerPercent = getDangerPercent(point)
+  const dangerLevel = useMemo(() => getDangerLevel(point), [point])
+  const dangerComment = useMemo(() => getDangerComment(point), [point])
 
   // ✅ 画面の空気（危険域）：48h〜で空気を変える
   const isDanger = point >= 48
@@ -201,7 +164,8 @@ export default function App() {
     if (!shared) await copyText(text)
   }
 
-const onBathReset = () => {
+  const onBathReset = () => {
+    // ✅ 押下演出（軽量）
     setBathFx(true)
     window.setTimeout(() => setBathFx(false), 400)
 
@@ -209,35 +173,41 @@ const onBathReset = () => {
     const t = nowMs()
     const todayKey = getTodayKeyJST()
 
-    const lastBathDay = safeGet('lastBathDay') ?? ''
-
     // ✅ 同じ日は「履歴にも積まない」（多押し/連打対策）
+    // ただし “危険度0へ戻す” 体験は維持（lastResetAtだけ更新）
     if (lastBathDay === todayKey) {
-      safeSet('lastResetAt', String(t))
-      setLastResetAt(t)
+      setAppState((prev) => {
+        const next: AppStateV1 = { ...prev, lastResetAt: t }
+        saveState(next)
+        return next
+      })
       setPoint(0)
       return
     }
-    // ✅ ここに移動（同日連打では記録されない）
-    const shouldRecord = before >= 1
-    if (shouldRecord) {
+
+    // ✅ 履歴：Aルール（1日1回） + 0時間連打は捨てる（before>=1のみ記録）
+    if (before >= 1) {
       appendBathEvent({ ts: t, dayKey: todayKey, pointBefore: before })
     }
 
-    safeSet('lastResetAt', String(t))
-    setLastResetAt(t)
-    setPoint(0)
-
+    // ✅ 日付差で「連続 or リセット」を決める
     const diff = lastBathDay ? diffDaysByDayKey(todayKey, lastBathDay) : null
-    const next = diff === 1 ? cleanStreak + 1 : 1
-    const nextBest = Math.max(bestClean, next)
+    const nextStreak = diff === 1 ? cleanStreak + 1 : 1
+    const nextBest = Math.max(bestClean, nextStreak)
 
-    setCleanStreak(next)
-    setBestClean(nextBest)
+    setAppState((prev) => {
+      const next: AppStateV1 = {
+        ...prev,
+        lastResetAt: t,
+        lastBathDay: todayKey,
+        currentCleanStreak: nextStreak,
+        bestCleanStreak: nextBest,
+      }
+      saveState(next)
+      return next
+    })
 
-    safeSet('currentCleanStreak', String(next))
-    safeSet('bestCleanStreak', String(nextBest))
-    safeSet('lastBathDay', todayKey)
+    setPoint(0)
   }
 
   // 🫧 履歴（自動スケーリング + 7/30 自動）
