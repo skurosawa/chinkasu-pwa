@@ -97,11 +97,14 @@ export default function App() {
     if (!lastBathDay) return
 
     const diff = diffDaysByDayKey(todayKey, lastBathDay)
+
+    // 1日でも空いたら即リセット
     if (diff !== null && diff >= 2) {
       setCleanStreak(0)
       safeSet('currentCleanStreak', '0')
+      safeSet('bestCleanStreak', String(bestClean)) // 念のため維持
     }
-  }, [])
+  }, [bestClean])
 
   // ✅ 1分ごと + iOS復帰時にポイント再計算（PWA安定性）
   useEffect(() => {
