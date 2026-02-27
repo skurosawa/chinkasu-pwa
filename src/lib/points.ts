@@ -1,9 +1,13 @@
-// src/lib/points.ts
-export const POINT_UNIT_MS = 60 * 60 * 1000 // 1 hour
-export const MAX_POINT = 48
+export const MAX_POINT = 72
 
-export function calcPoint(nowMs: number, lastResetAtMs: number, cap = MAX_POINT) {
-  const elapsed = Math.max(0, nowMs - lastResetAtMs)
-  const hours = Math.floor(elapsed / POINT_UNIT_MS)
-  return Math.min(hours, cap)
+/**
+ * 1時間で +1pt（最大 MAX_POINT）
+ * @param nowMs 現在時刻(ms)
+ * @param lastResetAt 最後に🛁した時刻(ms)
+ * @param max 最大ポイント（時間）
+ */
+export function calcPoint(nowMs: number, lastResetAt: number, max: number) {
+  const diff = Math.max(0, nowMs - lastResetAt)
+  const hours = diff / (60 * 60 * 1000)
+  return Math.min(max, hours)
 }
