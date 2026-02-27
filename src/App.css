@@ -3,7 +3,6 @@
   --bg1: #fff1fa;
 
   --card: rgba(255, 255, 255, 0.78);
-  --panel2: rgba(255, 255, 255, 0.46);
 
   --line: rgba(255, 105, 180, 0.16);
 
@@ -41,6 +40,7 @@ body {
   -webkit-text-size-adjust: 100%;
   font-family: system-ui, -apple-system, "Hiragino Sans", "Noto Sans JP",
     "Helvetica Neue", Arial, sans-serif;
+
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -80,23 +80,6 @@ body {
 
 .app.dangerMode::before {
   opacity: 1;
-}
-
-/* ✅ “押せるのは🛁だけ” + 共有のみ例外 */
-.top,
-.brand,
-.hero,
-.gaugeWrap,
-.historyPanel,
-.panelHeader,
-.panelTitle,
-.historyBars,
-.historyItem,
-.historyBar,
-.historyDot,
-.historyDay {
-  cursor: default;
-  user-select: none;
 }
 
 /* ---------- Layout ---------- */
@@ -194,11 +177,15 @@ body {
 
 .gaugeWrap {
   margin-top: 18px;
+  display: grid;
+  gap: 10px;
+  justify-items: center;
 }
 
 /* ---------- Gauge ---------- */
 
 .gauge {
+  width: 100%;
   height: 16px;
   border-radius: 999px;
   background: rgba(255, 105, 180, 0.09);
@@ -218,29 +205,65 @@ body {
   border-color: rgba(255, 105, 180, 0.08);
 }
 
-/* ===== 72h 危険度カラー段階 ===== */
+/* ===== 6段階：かわいい → 黒っぽい ===== */
 
-/* 0〜23h：かわいい */
+/* 0〜11h */
 .gauge.low .gaugeFill {
+  background: linear-gradient(90deg, #ffb2da, #ffe1f1);
+}
+
+/* 12〜23h */
+.gauge.lowmid .gaugeFill {
   background: linear-gradient(90deg, #ff7dbb, #ffb2da, #ffe1f1);
 }
 
-/* 24〜47h：濃くなる（不穏） */
+/* 24〜35h */
 .gauge.mid .gaugeFill {
-  background: linear-gradient(90deg, #ff4fa2, #d946ef, #a855f7);
+  background: linear-gradient(90deg, #ff4fa2, #d946ef);
 }
 
-/* 48〜71h：暗い紫（かなりヤバい） */
+/* 36〜47h */
 .gauge.high .gaugeFill {
-  background: linear-gradient(90deg, #7e22ce, #4c1d95, #2e1065);
+  background: linear-gradient(90deg, #a855f7, #7e22ce);
+}
+
+/* 48〜71h */
+.gauge.extreme .gaugeFill {
+  background: linear-gradient(90deg, #581c87, #2e1065);
   box-shadow: 0 0 12px rgba(46, 16, 101, 0.35);
 }
 
-/* 72h〜：ほぼ黒（終わり） */
-.gauge.extreme .gaugeFill {
+/* 72h〜 */
+.gauge.extreme2 .gaugeFill {
   background: linear-gradient(90deg, #1b0b2a, #0f0a1a, #05040a);
   box-shadow: 0 0 18px rgba(0, 0, 0, 0.55);
   filter: saturate(0.9) contrast(1.05);
+}
+
+/* ---------- Danger comment badge ---------- */
+
+.dangerBadge {
+  max-width: 100%;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 105, 180, 0.14);
+  background: rgba(255, 255, 255, 0.58);
+  font-weight: 900;
+  font-size: 12px;
+  line-height: 1.1;
+  color: rgba(107, 91, 110, 0.86);
+  user-select: none;
+  pointer-events: none;
+}
+
+/* ボタンに見えないように固定（色は変えない方針） */
+.dangerBadge--low,
+.dangerBadge--lowmid,
+.dangerBadge--mid,
+.dangerBadge--high,
+.dangerBadge--extreme,
+.dangerBadge--extreme2 {
+  color: rgba(107, 91, 110, 0.86);
 }
 
 /* ---------- CTA (唯一の強ボタン) ---------- */

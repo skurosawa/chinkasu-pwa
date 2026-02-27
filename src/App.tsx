@@ -75,6 +75,7 @@ export default function App() {
     Number(safeGet('bestCleanStreak') ?? '0'),
   )
 
+  // ✅ 🛁ボタン押下エフェクト
   const [bathFx, setBathFx] = useState(false)
 
   // ✅ 神清潔段階（7 / 14 / 30）
@@ -137,16 +138,33 @@ export default function App() {
   // ✅ 危険度（0〜100） ※ MAX_POINT=72h
   const dangerPercent = Math.min(100, Math.round((point / MAX_POINT) * 100))
 
-  // ✅ 危険レベル（色段階）
-  const dangerLevel =
-    point >= 72 ? 'extreme' : point >= 48 ? 'high' : point >= 24 ? 'mid' : 'low'
+  // ✅ 6段階（12h刻みベース）※色用クラス
+  const dangerLevel = useMemo(() => {
+    if (point >= 72) return 'extreme2' // 72h〜
+    if (point >= 48) return 'extreme' // 48〜71h
+    if (point >= 36) return 'high' // 36〜47h
+    if (point >= 24) return 'mid' // 24〜35h
+    if (point >= 12) return 'lowmid' // 12〜23h
+    return 'low' // 0〜11h
+  }, [point])
 
-  // ✅ 画面の空気（危険域）
+  // ✅ ゲージ下コメント（6段階）
+  const dangerComment = useMemo(() => {
+    if (point >= 72) return '……今すぐおふろ。ね？（ほんき）'
+    if (point >= 48) return '放置姫しすぎ…？今すぐおふろ行こ？'
+    if (point >= 36) return 'ほんとに今日は入ろ？ね？'
+    if (point >= 24) return 'そろそろおふろしたくなってきたかも？'
+    if (point >= 12) return '今日もちゃんとキープできてるね〜♡'
+    return 'きらきら清潔〜 えらいっ♡'
+  }, [point])
+
+  // ✅ 画面の空気（危険域）：48h〜で空気を変える
   const isDanger = point >= 48
 
   const buildShareText = () => {
     const streakText = cleanStreak <= 1 ? '1日目' : `${cleanStreak}日連続`
     const sparkle = isGodClean ? ' ✨' : ''
+    // URLは入れない（要望）
     return `🛁 おふろ入った〜 🫧 ${streakText}${sparkle}
 #ふろキャン`
   }
@@ -242,8 +260,28 @@ export default function App() {
 
           {/* ✅ 危険度ゲージ：風呂に入ってない時間（最大72h） */}
           <div className="gaugeWrap">
-            <div className={`gauge ${dangerLevel} ${dangerPercent === 0 ? 'isZero' : ''}`}>
+            <div
+              className={[
+                'gauge',
+                dangerLevel,
+                dangerPercent === 0 ? 'isZero' : '',
+              ]
+                .filter(Boolean)
+                .join(' ')}
+              aria-hidden="true"
+            >
               <div className="gaugeFill" style={{ width: `${dangerPercent}%` }} />
+            </div>
+
+            {/* ✅ コメント付きバッジ（押せない・増えすぎない） */}
+            <div
+              className={[
+                'dangerBadge',
+                `dangerBadge--${dangerLevel}`,
+              ].join(' ')}
+              aria-hidden="true"
+            >
+              {dangerComment}
             </div>
           </div>
         </section>
