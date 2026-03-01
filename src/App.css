@@ -397,8 +397,8 @@ body {
 }
 
 .shareIcon {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   color: var(--pink);
 }
 
@@ -416,6 +416,11 @@ body {
 
 .shareButton svg {
   display: block;
+}
+
+.shareBtn {
+  background: rgba(255,255,255,0.7);
+  backdrop-filter: blur(6px);
 }
 
 
