@@ -402,6 +402,22 @@ body {
   color: var(--pink);
 }
 
+.shareButton {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #3b82f6;
+  background: white;
+  border-radius: 999px;
+  padding: 6px 12px;
+  border: none;
+  font-size: 14px;
+}
+
+.shareButton svg {
+  display: block;
+}
+
 
 /* =========================================================
    ♿ Motion Reduction

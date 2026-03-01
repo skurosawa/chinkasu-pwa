@@ -1,5 +1,8 @@
 import './App.css'
 import { useEffect, useMemo, useState } from 'react'
+
+/* ---------- Domain / Lib ---------- */
+
 import {
   calcPoint,
   MAX_POINT,
@@ -7,10 +10,17 @@ import {
   getDangerLevel,
   getDangerPercent,
 } from './lib/points'
+
 import { loadBathEvents, appendBathEvent } from './lib/bathHistory'
 import { copyText, tryNativeShare } from './lib/share'
 import { loadState, saveState, type AppState } from './lib/storage'
 import { computeBathResult } from './domain/computeBathResult'
+
+/* ---------- UI Components ---------- */
+
+import ShareButton from './components/ShareButton'
+
+/* ---------- Date Helpers（将来 domain/dateKey.ts に移動可） ---------- */
 
 const nowMs = () => Date.now()
 
@@ -40,12 +50,18 @@ const labelFromDayKey = (key: string) => {
   return p ? `${p.m}/${p.d}` : key
 }
 
+/* ===================================================== */
+
 export default function App() {
+  /* ---------- State ---------- */
+
   const [appState, setAppState] = useState<AppState>(() => loadState())
   const [point, setPoint] = useState(0)
   const [bathFx, setBathFx] = useState(false)
 
   const { currentCleanStreak, bestCleanStreak, lastResetAt, lastBathDay } = appState
+
+  /* ---------- 清潔ランク ---------- */
 
   const cleanTier = useMemo(() => {
     if (currentCleanStreak >= 30) return { key: 'legend', label: '伝説清潔', badge: '👑' }
@@ -56,6 +72,8 @@ export default function App() {
 
   const isGodClean = cleanTier.key !== 'none'
   const historyRange: 7 | 30 = isGodClean ? 30 : 7
+
+  /* ---------- ポイント更新（1分ごと） ---------- */
 
   useEffect(() => {
     const tick = () => {
@@ -79,10 +97,14 @@ export default function App() {
     }
   }, [lastResetAt])
 
+  /* ---------- 危険度 ---------- */
+
   const dangerPercent = getDangerPercent(point)
   const dangerLevel = useMemo(() => getDangerLevel(point), [point])
   const dangerComment = useMemo(() => getDangerComment(point), [point])
   const isDanger = point >= 48
+
+  /* ---------- 入浴ボタン ---------- */
 
   const onBathReset = () => {
     setBathFx(true)
@@ -116,11 +138,14 @@ export default function App() {
     setPoint(0)
   }
 
+  /* ---------- 共有 ---------- */
+
   const buildShareText = () => {
     const streakText =
       currentCleanStreak <= 1
         ? '1日目'
         : `${currentCleanStreak}日連続`
+
     const sparkle = isGodClean ? ' ✨' : ''
     return `🛁 おふろ入った〜 🫧 ${streakText}${sparkle}\n#ふろリズム`
   }
@@ -130,6 +155,8 @@ export default function App() {
     const shared = await tryNativeShare({ text })
     if (!shared) await copyText(text)
   }
+
+  /* ---------- 履歴 ---------- */
 
   const historyData = useMemo(() => {
     const events = loadBathEvents()
@@ -164,6 +191,8 @@ export default function App() {
     return { items }
   }, [historyRange, currentCleanStreak])
 
+  /* ===================================================== */
+
   return (
     <div className={`app ${isDanger ? 'dangerMode' : ''}`}>
       <header className="top">
@@ -178,6 +207,7 @@ export default function App() {
       </header>
 
       <main className="stage">
+        {/* ---------- Hero ---------- */}
         <section className="hero">
           <div className="heroNumber">
             <span className="heroValue">{currentCleanStreak}</span>
@@ -194,6 +224,7 @@ export default function App() {
           </div>
         </section>
 
+        {/* ---------- CTA ---------- */}
         <div className="cta">
           <button
             className={`bathCta ${bathFx ? 'bathFx' : ''}`}
@@ -203,10 +234,13 @@ export default function App() {
           </button>
         </div>
 
+        {/* ---------- History ---------- */}
         <section className="historyPanel">
           <div className="panelHeader">
             <h2 className="panelTitle">履歴</h2>
-            <button className="shareBtn" onClick={onShare}>共有</button>
+
+            {/* ★ SVG共有ボタン */}
+            <ShareButton onClick={onShare} />
           </div>
 
           <div className="historyBars">
