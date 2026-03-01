@@ -1,96 +1,122 @@
+/* =========================================================
+   🎀 ふろリズム — App.css（整理版）
+   役割ごとにセクション分け＋設計意図コメント付き
+   ========================================================= */
+
+
+/* =========================================================
+   🎨 Design Tokens（色・半径・影などの共通定義）
+   ========================================================= */
+
 :root {
+  /* 背景グラデーション */
   --bg0: #fff7fb;
   --bg1: #fff1fa;
 
+  /* カード表面 */
   --card: rgba(255, 255, 255, 0.78);
 
+  /* 薄い境界線 */
   --line: rgba(255, 105, 180, 0.16);
 
+  /* 文字色 */
   --text: #2b2230;
   --sub: #6b5b6e;
 
+  /* ブランドピンク */
   --pink: #ff5fa2;
   --pink2: #ffa6d4;
   --pink3: #ffd1e8;
 
+  /* 影（浮遊感） */
   --shadow: 0 10px 26px rgba(255, 105, 180, 0.12);
 
+  /* 角丸 */
   --r-xl: 26px;
 }
+
+
+/* =========================================================
+   🧱 Reset / Base
+   iOS Safari / PWA 安定化を優先
+   ========================================================= */
 
 * {
   box-sizing: border-box;
 }
 
-/* ✅ iOS Safari / PWAでの土台を安定化 */
 html,
 body {
   height: 100%;
 }
 
-/* ✅ iOSの表示領域変動に強い（PWA / Safari） */
+/* iOSのアドレスバー変動に強い高さ指定 */
 body {
   min-height: 100svh;
-
   margin: 0;
   color: var(--text);
-  background: radial-gradient(
-      1200px 600px at 50% -120px,
-      rgba(255, 95, 162, 0.18),
-      transparent 60%
-    ),
-    linear-gradient(180deg, var(--bg0), var(--bg1));
-  -webkit-text-size-adjust: 100%;
-  font-family: system-ui, -apple-system, "Hiragino Sans", "Noto Sans JP",
-    "Helvetica Neue", Arial, sans-serif;
 
+  background:
+    radial-gradient(1200px 600px at 50% -120px, rgba(255,95,162,0.18), transparent 60%),
+    linear-gradient(180deg, var(--bg0), var(--bg1));
+
+  font-family:
+    system-ui,
+    -apple-system,
+    "Hiragino Sans",
+    "Noto Sans JP",
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
+
+  -webkit-text-size-adjust: 100%;
   -webkit-tap-highlight-color: transparent;
 
-  /* ✅ 文字の見え方を安定化（iOSで太字が潰れにくく） */
+  /* フォントレンダリング安定 */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
 }
 
-/* ---------- App Shell ---------- */
+
+/* =========================================================
+   📦 App Shell
+   ========================================================= */
 
 .app {
   max-width: 520px;
   margin: 0 auto;
-  padding: calc(18px + env(safe-area-inset-top)) 14px
+  padding:
+    calc(18px + env(safe-area-inset-top))
+    14px
     calc(28px + env(safe-area-inset-bottom));
-  color: var(--text);
   position: relative;
 }
 
-/* ✅ 危険域の空気（うっすら曇る） */
+/* 危険域で空気を暗くする演出 */
 .app::before {
   content: "";
   position: absolute;
   inset: -8px;
-  pointer-events: none;
   border-radius: 24px;
+  pointer-events: none;
 
   opacity: 0;
   transition: opacity 0.25s ease;
 
-  background: radial-gradient(
-      900px 420px at 50% -120px,
-      rgba(20, 10, 28, 0.18),
-      transparent 62%
-    ),
-    radial-gradient(
-      700px 520px at 50% 110%,
-      rgba(10, 6, 18, 0.12),
-      transparent 60%
-    );
+  background:
+    radial-gradient(900px 420px at 50% -120px, rgba(20,10,28,0.18), transparent 62%),
+    radial-gradient(700px 520px at 50% 110%, rgba(10,6,18,0.12), transparent 60%);
 }
 
 .app.dangerMode::before {
   opacity: 1;
 }
 
-/* ---------- Layout ---------- */
+
+/* =========================================================
+   🧭 Layout
+   ========================================================= */
 
 .stage {
   display: flex;
@@ -98,7 +124,10 @@ body {
   gap: 20px;
 }
 
-/* ---------- Top ---------- */
+
+/* =========================================================
+   🏷 Header
+   ========================================================= */
 
 .top {
   padding-top: env(safe-area-inset-top);
@@ -118,7 +147,6 @@ body {
   font-weight: 900;
   letter-spacing: 0.04em;
   color: rgba(107, 91, 110, 0.88);
-  text-align: center;
 }
 
 .godBadge {
@@ -127,53 +155,56 @@ body {
   gap: 8px;
   padding: 6px 10px;
   border-radius: 999px;
+
   border: 1px solid rgba(255, 105, 180, 0.18);
   background: rgba(255, 255, 255, 0.58);
-  font-weight: 900;
+
   font-size: 12px;
+  font-weight: 900;
   color: var(--pink);
 }
 
-/* ---------- Hero (主役) ---------- */
+
+/* =========================================================
+   🌟 Hero Card（主役UI）
+   ========================================================= */
 
 .hero {
   position: relative;
   padding: 28px 18px;
   border-radius: var(--r-xl);
-  background: var(--card);
+
   border: 1px solid var(--line);
   box-shadow: var(--shadow);
+  text-align: center;
 
-  /* ✅ 透明感の強化（対応環境のみ） */
+  /* 透明カード */
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
 
-  /* ✅ backdrop-filter 非対応のときも“白カード感”が保てる */
-  background-color: rgba(255, 255, 255, 0.84);
-
-  text-align: center;
+  /* 非対応ブラウザ用フォールバック */
+  background-color: rgba(255,255,255,0.84);
 }
 
-/* ✅ backdrop-filterが効く環境では元の透け感に戻す（安定＆綺麗） */
 @supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
   .hero {
     background-color: var(--card);
   }
 }
 
-/* ✨ ほんのり空気感 */
+/* 空気の光 */
 .hero::after {
   content: "";
   position: absolute;
   inset: -40px -20px;
-  background: radial-gradient(
-    500px 220px at 50% 0%,
-    rgba(255, 95, 162, 0.10),
-    transparent 70%
-  );
+  background: radial-gradient(500px 220px at 50% 0%, rgba(255,95,162,0.10), transparent 70%);
   z-index: -1;
-  pointer-events: none;
 }
+
+
+/* =========================================================
+   🔢 Streak Number
+   ========================================================= */
 
 .heroNumber {
   display: flex;
@@ -193,8 +224,12 @@ body {
   font-weight: 900;
   letter-spacing: 0.06em;
   color: rgba(107, 91, 110, 0.72);
-  transform: translateY(-2px);
 }
+
+
+/* =========================================================
+   📊 Danger Gauge
+   ========================================================= */
 
 .gaugeWrap {
   margin-top: 18px;
@@ -203,91 +238,58 @@ body {
   justify-items: center;
 }
 
-/* ---------- Gauge ---------- */
-
 .gauge {
   width: 100%;
   height: 16px;
   border-radius: 999px;
-  background: rgba(255, 105, 180, 0.09);
-  border: 1px solid rgba(255, 105, 180, 0.11);
   overflow: hidden;
+
+  background: rgba(255,105,180,0.09);
+  border: 1px solid rgba(255,105,180,0.11);
 }
 
 .gaugeFill {
   height: 100%;
   border-radius: 999px;
-  transition: width 0.25s ease, filter 0.2s ease, box-shadow 0.2s ease;
+  transition: width 0.25s ease;
 }
 
-/* ✅ 0%でもレールは見せる（塗りは0） */
 .gauge.isZero {
-  background: rgba(255, 105, 180, 0.06);
-  border-color: rgba(255, 105, 180, 0.08);
+  background: rgba(255,105,180,0.06);
 }
 
-/* ===== 6段階：かわいい → 黒っぽい ===== */
 
-/* 0〜11h */
-.gauge.low .gaugeFill {
-  background: linear-gradient(90deg, #ffb2da, #ffe1f1);
-}
+/* 危険度カラー段階 */
+.gauge.low .gaugeFill     { background: linear-gradient(90deg,#ffb2da,#ffe1f1); }
+.gauge.lowmid .gaugeFill  { background: linear-gradient(90deg,#ff7dbb,#ffb2da,#ffe1f1); }
+.gauge.mid .gaugeFill     { background: linear-gradient(90deg,#ff4fa2,#d946ef); }
+.gauge.high .gaugeFill    { background: linear-gradient(90deg,#a855f7,#7e22ce); }
+.gauge.extreme .gaugeFill { background: linear-gradient(90deg,#581c87,#2e1065); }
+.gauge.extreme2 .gaugeFill{ background: linear-gradient(90deg,#1b0b2a,#0f0a1a,#05040a); }
 
-/* 12〜23h */
-.gauge.lowmid .gaugeFill {
-  background: linear-gradient(90deg, #ff7dbb, #ffb2da, #ffe1f1);
-}
 
-/* 24〜35h */
-.gauge.mid .gaugeFill {
-  background: linear-gradient(90deg, #ff4fa2, #d946ef);
-}
-
-/* 36〜47h */
-.gauge.high .gaugeFill {
-  background: linear-gradient(90deg, #a855f7, #7e22ce);
-}
-
-/* 48〜71h */
-.gauge.extreme .gaugeFill {
-  background: linear-gradient(90deg, #581c87, #2e1065);
-  box-shadow: 0 0 12px rgba(46, 16, 101, 0.35);
-}
-
-/* 72h〜 */
-.gauge.extreme2 .gaugeFill {
-  background: linear-gradient(90deg, #1b0b2a, #0f0a1a, #05040a);
-  box-shadow: 0 0 18px rgba(0, 0, 0, 0.55);
-  filter: saturate(0.9) contrast(1.05);
-}
-
-/* ---------- Danger comment badge ---------- */
+/* =========================================================
+   💬 Danger Comment
+   ========================================================= */
 
 .dangerBadge {
-  max-width: 100%;
   padding: 8px 12px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 105, 180, 0.14);
-  background: rgba(255, 255, 255, 0.58);
-  font-weight: 900;
+
+  border: 1px solid rgba(255,105,180,0.14);
+  background: rgba(255,255,255,0.58);
+
   font-size: 12px;
-  line-height: 1.1;
-  color: rgba(107, 91, 110, 0.86);
-  user-select: none;
+  font-weight: 900;
+  color: rgba(107,91,110,0.86);
+
   pointer-events: none;
 }
 
-/* ボタンに見えないように固定（色は変えない方針） */
-.dangerBadge--low,
-.dangerBadge--lowmid,
-.dangerBadge--mid,
-.dangerBadge--high,
-.dangerBadge--extreme,
-.dangerBadge--extreme2 {
-  color: rgba(107, 91, 110, 0.86);
-}
 
-/* ---------- CTA (唯一の強ボタン) ---------- */
+/* =========================================================
+   🚿 Bath Button（最重要ボタン）
+   ========================================================= */
 
 .cta {
   display: flex;
@@ -307,83 +309,35 @@ body {
   border: 0;
   border-radius: 999px;
 
-  font-weight: 900;
   font-size: 17px;
-  letter-spacing: 0.02em;
+  font-weight: 900;
   color: #fff;
 
   background: linear-gradient(90deg, var(--pink), #ff79b8);
-  box-shadow: 0 20px 44px rgba(255, 95, 162, 0.30);
+  box-shadow: 0 20px 44px rgba(255,95,162,0.30);
 
   cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
-
-  position: relative;
-  overflow: hidden;
 }
 
 .bathCta:active {
   transform: translateY(1px) scale(0.99);
 }
 
-.bathEmoji {
-  font-size: 20px;
-  line-height: 1;
-  transform: translateY(1px);
-}
 
-.bathLabel {
-  font-size: 16px;
-}
-
-/* きらっ（軽量） */
-.bathCta.bathFx::after {
-  content: "";
-  position: absolute;
-  inset: -40%;
-  background: radial-gradient(
-    circle,
-    rgba(255, 255, 255, 0.9) 0%,
-    rgba(255, 255, 255, 0.4) 25%,
-    transparent 60%
-  );
-  animation: bathSparkle 0.4s ease-out;
-  pointer-events: none;
-}
-
-@keyframes bathSparkle {
-  0% {
-    opacity: 0.8;
-    transform: scale(0.8);
-  }
-  100% {
-    opacity: 0;
-    transform: scale(1.6);
-  }
-}
-
-/* ---------- History panel ---------- */
+/* =========================================================
+   📈 History Panel
+   ========================================================= */
 
 .historyPanel {
   margin-top: 24px;
   padding-top: 20px;
-  border-top: 1px solid rgba(255, 105, 180, 0.14);
+  border-top: 1px solid rgba(255,105,180,0.14);
 }
 
 .panelHeader {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 10px;
-}
-
-.panelTitle {
-  margin: 0;
-  font-weight: 900;
-  font-size: 14px;
-  color: rgba(107, 91, 110, 0.86);
 }
 
 .historyBars {
@@ -400,24 +354,20 @@ body {
   align-items: center;
   gap: 6px;
   flex: 1;
-  pointer-events: none;
 }
 
 .historyBar {
   width: 100%;
   max-width: 28px;
-  background: linear-gradient(180deg, #ff7dbb, #ffb2da);
+  background: linear-gradient(180deg,#ff7dbb,#ffb2da);
   border-radius: 8px 8px 4px 4px;
-  transition: height 0.2s ease;
-  opacity: 1;
 }
 
 .historyDot {
   width: 10px;
   height: 10px;
   border-radius: 999px;
-  background: rgba(255, 95, 162, 0.18);
-  border: 1px solid rgba(255, 95, 162, 0.10);
+  background: rgba(255,95,162,0.18);
 }
 
 .historyDay {
@@ -426,12 +376,12 @@ body {
   font-weight: 700;
 }
 
-/* ---------- Share Button (icon only / pink) ---------- */
+
+/* =========================================================
+   🔗 Share Button
+   ========================================================= */
 
 .shareBtn {
-  appearance: none;
-  -webkit-appearance: none;
-
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -440,18 +390,10 @@ body {
   height: 34px;
 
   border-radius: 999px;
-  border: 1px solid rgba(255, 105, 180, 0.18);
-  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(255,105,180,0.18);
+  background: rgba(255,255,255,0.55);
 
   cursor: pointer;
-  pointer-events: auto;
-
-  -webkit-tap-highlight-color: transparent;
-  transition: background 0.15s ease, transform 0.1s ease;
-}
-
-.shareBtn:active {
-  transform: translateY(0.5px) scale(0.97);
 }
 
 .shareIcon {
@@ -460,28 +402,17 @@ body {
   color: var(--pink);
 }
 
-@media (hover: hover) {
-  .shareBtn:hover {
-    background: rgba(255, 255, 255, 0.65);
-  }
-}
 
-/* ---------- Accessibility ---------- */
+/* =========================================================
+   ♿ Motion Reduction
+   ========================================================= */
 
 @media (prefers-reduced-motion: reduce) {
-  .gaugeFill {
-    transition: none;
-  }
-  .historyBar {
-    transition: none;
-  }
-  .bathCta {
-    transition: none;
-  }
+  .gaugeFill,
+  .historyBar,
+  .bathCta,
   .app::before {
     transition: none;
   }
-  .bathCta.bathFx::after {
-    animation: none;
-  }
 }
+
